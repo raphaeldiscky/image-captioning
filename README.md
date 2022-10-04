@@ -1,4 +1,12 @@
+<<<<<<< HEAD
+
 # Image-Captioning
+
+## Roadmap
+
+![Roadmap](images/roadmap.jpeg)
+
+> > > > > > > 55b0bc88305f23462e26f3a1b8e8fc7d48967d2e
 
 Keras/Tensorflow Image Captioning application using CNN and Transformer as encoder/decoder. </br>
 In particulary, the architecture consists of three models:
@@ -167,4 +175,4 @@ Examples of image output taken from the test set.
 | a train is on the tracks near a station |
 | :-------------------------------------: |
 
-![](https://github.com/Dantekk/Image-Captioning/blob/main/examples_img/14.jpg)
+# ![](https://github.com/Dantekk/Image-Captioning/blob/main/examples_img/14.jpg)
