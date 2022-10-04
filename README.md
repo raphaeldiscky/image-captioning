@@ -1,12 +1,8 @@
-<<<<<<< HEAD
-
-# Image-Captioning
-
 ## Roadmap
 
 ![Roadmap](images/roadmap.jpeg)
 
-> > > > > > > 55b0bc88305f23462e26f3a1b8e8fc7d48967d2e
+# Image-Captioning
 
 Keras/Tensorflow Image Captioning application using CNN and Transformer as encoder/decoder. </br>
 In particulary, the architecture consists of three models:
