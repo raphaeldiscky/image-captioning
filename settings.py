@@ -38,11 +38,14 @@ VALID_SET_AUG = False
 TEST_SET = False
 
 # Load train_data.json pathfile
-train_data_json_path = "COCO_dataset/captions_mapping_train.json"
+train_data_json_path = "COCO_dataset/english/captions_mapping_train.json"
 # Load valid_data.json pathfile
-valid_data_json_path = "COCO_dataset/captions_mapping_valid.json"
+valid_data_json_path = "COCO_dataset/english/captions_mapping_valid.json"
 # Load text_data.json pathfile
-text_data_json_path = "COCO_dataset/text_data.json"
+text_data_json_path = "COCO_dataset/english/text_data.json"
 
 # Save training files directory
 SAVE_DIR = "save_train_dir/model_weights/"
+
+# Save JSON caption file
+results_file = "./results/captions_val2014_results.json"

@@ -1,7 +1,5 @@
 __pycache__/
 save_train_dir/model_weights/*.h5
-COCO_dataset/train2014
-COCO_dataset/val2014
-COCO_dataset/test2014
-COCO_dataset/raw
+COCO_dataset/english
+COCO_dataset/indonesian
 captions_val2014_results.json
