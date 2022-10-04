@@ -47,5 +47,10 @@ text_data_json_path = "COCO_dataset/english/text_data.json"
 # Save training files directory
 SAVE_DIR = "save_train_dir/model_weights/"
 
-# Save JSON caption file
-results_file = "./results/captions_val2014_results.json"
+# Settings for coco_evaluation.py
+RESULT_DIR = "./results/captions_val2014_results.json"
+ANNOTATION_DIR = "./COCO_dataset/english/captions/captions_val2014.json"
+
+# Settings for generate_json.py
+PATH_VAL_DIR = "./COCO_dataset/english/val2014"
+TOTAL_DATA = 1000

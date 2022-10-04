@@ -1,12 +1,10 @@
 from pycocotools.coco import COCO
 from pycocoevalcap.eval import COCOEvalCap
-from settings import results_file
-
-annotation_file = "./COCO_dataset/captions/captions_val2014.json"
+from settings import RESULT_DIR, ANNOTATION_DIR
 
 # create coco object and coco_result object
-coco = COCO(annotation_file)
-coco_result = coco.loadRes(results_file)
+coco = COCO(ANNOTATION_DIR)
+coco_result = coco.loadRes(RESULT_DIR)
 
 # create coco_eval object by taking coco and coco_result
 coco_eval = COCOEvalCap(coco, coco_result)

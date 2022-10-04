@@ -4,10 +4,7 @@ import tensorflow as tf
 from settings_inference import *
 import os
 import json
-
-# Settings
-path_val_dir = "./COCO_dataset/val2014"
-total_data = 1000
+from settings import PATH_VAL_DIR, TOTAL_DATA
 
 # Get tokenizer layer from disk
 tokenizer = tf.keras.models.load_model(tokernizer_path)
@@ -24,10 +21,10 @@ list = []
 with open(get_model_config_path) as json_file:
     model_config = json.load(json_file)
 
-for filename in os.listdir(path_val_dir)[:total_data]:
+for filename in os.listdir(PATH_VAL_DIR)[:TOTAL_DATA]:
     dict = {}
     image_id = filename.replace("COCO_val2014_", "").replace(".jpg", "").lstrip("0")
-    image_path = os.path.join(path_val_dir, filename).replace("\\", "/")
+    image_path = os.path.join(PATH_VAL_DIR, filename).replace("\\", "/")
     dict["image_id"] = int(image_id)
     dict["caption"] = generate_caption(
         image_path, model, tokenizer, model_config["SEQ_LENGTH"]
