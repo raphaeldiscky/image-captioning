@@ -1,8 +1,8 @@
+from settings_inference import MODEL_CONFIG_PATH, MODEL_WEIGHT_PATH, TOKENIZER_PATH
 from utility import get_inference_model, generate_caption
 import json
 import tensorflow as tf
 import argparse
-from settings_inference import TOKENIZER_PATH, MODEL_CONFIG_PATH, MODEL_WEIGHT_PATH
 
 # Get tokenizer layer from disk
 tokenizer = tf.keras.models.load_model(TOKENIZER_PATH)

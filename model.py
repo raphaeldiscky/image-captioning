@@ -1,8 +1,8 @@
 import tensorflow as tf
+from settings import EMBED_DIM, IMAGE_SIZE, SEQ_LENGTH
 from tensorflow.keras import layers
 from tensorflow import keras
 from tensorflow.keras.applications import efficientnet
-from settings import *
 
 
 def get_cnn_model():

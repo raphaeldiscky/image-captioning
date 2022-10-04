@@ -1,4 +1,5 @@
 import tensorflow as tf
+from settings import IMAGE_SIZE
 from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
 from custom_schedule import custom_schedule
 from tensorflow import keras
@@ -12,14 +13,13 @@ from dataset import read_image_inf
 import numpy as np
 import json
 import re
-from settings import *
 
 
 def save_tokenizer(tokenizer, path_save):
     input = tf.keras.layers.Input(shape=(1,), dtype=tf.string)
     output = tokenizer(input)
     model = tf.keras.Model(input, output)
-    model.save(path_save + "tokenizer", save_format="tf")
+    model.save(path_save + "/tokenizer", save_format="tf")
 
 
 def get_inference_model(model_config_path):

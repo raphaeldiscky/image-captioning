@@ -1,13 +1,13 @@
 import os
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+
 from dataset import (
     make_dataset,
     custom_standardization,
     reduce_dataset_dim,
     valid_test_split,
 )
-from settings import *
 from custom_schedule import custom_schedule
 from model import (
     get_cnn_model,
@@ -21,6 +21,27 @@ import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
 import numpy as np
+from plot_training import plot_training
+from settings import (
+    BATCH_SIZE,
+    DATE_NOW,
+    EMBED_DIM,
+    EPOCHS,
+    FF_DIM,
+    IMAGE_SIZE,
+    NUM_HEADS,
+    SAVE_DIR,
+    VALID_SET_AUG,
+    train_data_json_path,
+    valid_data_json_path,
+    text_data_json_path,
+    REDUCE_DATASET,
+    MAX_VOCAB_SIZE,
+    SEQ_LENGTH,
+    TRAIN_SET_AUG,
+    TEST_SET,
+)
+
 
 # Load dataset
 with open(train_data_json_path) as json_file:
@@ -115,6 +136,8 @@ history = caption_model.fit(
     callbacks=[early_stopping],
 )
 
+plot_training(history)
+
 # Compute definitive metrics on train/valid set
 train_metrics = caption_model.evaluate(train_dataset, batch_size=BATCH_SIZE)
 valid_metrics = caption_model.evaluate(valid_dataset, batch_size=BATCH_SIZE)
@@ -132,12 +155,16 @@ if TEST_SET:
         "Test Loss = %.4f - Test Accuracy = %.4f" % (test_metrics[0], test_metrics[1])
     )
 
+# Create new directory for saving model
+NEW_DIR = SAVE_DIR + DATE_NOW
+os.mkdir(NEW_DIR)
+
 # Save training history under the form of a json file
 history_dict = history.history
-json.dump(history_dict, open(SAVE_DIR + "history.json", "w"))
+json.dump(history_dict, open(SAVE_DIR + "{}/history.json".format(DATE_NOW), "w"))
 
 # Save weights model
-caption_model.save_weights(SAVE_DIR + "model_weights_coco.h5")
+caption_model.save_weights(SAVE_DIR + "{}/model_weights_coco.h5".format(DATE_NOW))
 
 # Save config model train
 config_train = {
@@ -152,7 +179,7 @@ config_train = {
     "VOCAB_SIZE": VOCAB_SIZE,
 }
 
-json.dump(config_train, open(SAVE_DIR + "config_train.json", "w"))
+json.dump(config_train, open(SAVE_DIR + "{}/config_train.json".format(DATE_NOW), "w"))
 
 # Save Tokenizer model
-save_tokenizer(tokenizer, SAVE_DIR)
+save_tokenizer(tokenizer, NEW_DIR)

@@ -4,8 +4,8 @@ import math
 import numpy as np
 import tensorflow as tf
 import tensorflow_addons as tfa
-from settings import *
 import image_aug
+from settings import BATCH_SIZE, IMAGE_SIZE, NUM_TRAIN_IMG, NUM_VALID_IMG, SHUFFLE_DIM
 
 strip_chars = "!\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
 AUTOTUNE = tf.data.AUTOTUNE

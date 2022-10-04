@@ -1,3 +1,7 @@
+from datetime import datetime
+
+DATE_NOW = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
+
 # Desired image dimensions
 IMAGE_SIZE = (299, 299)
 # Max vocabulary size
@@ -35,22 +39,22 @@ TRAIN_SET_AUG = True
 # Data augmention on valid set
 VALID_SET_AUG = False
 # If you want to calculate the performance on the test set.
-TEST_SET = False
+TEST_SET = True
 
 # Load train_data.json pathfile
-train_data_json_path = "COCO_dataset/english/captions_mapping_train.json"
+train_data_json_path = "COCO_dataset/captions_mapping_train.json"
 # Load valid_data.json pathfile
-valid_data_json_path = "COCO_dataset/english/captions_mapping_valid.json"
+valid_data_json_path = "COCO_dataset/captions_mapping_valid.json"
 # Load text_data.json pathfile
-text_data_json_path = "COCO_dataset/english/text_data.json"
+text_data_json_path = "COCO_dataset/text_data.json"
 
 # Save training files directory
-SAVE_DIR = "save_train_dir/model_weights/"
+SAVE_DIR = "save_train_dir/"
 
 # Settings for coco_evaluation.py
 RESULT_DIR = "./results/captions_val2014_results.json"
-ANNOTATION_DIR = "./COCO_dataset/english/captions/captions_val2014.json"
+ANNOTATION_DIR = "./COCO_dataset/captions/captions_val2014.json"
 
 # Settings for generate_json.py
-PATH_VAL_DIR = "./COCO_dataset/english/val2014"
+PATH_VAL_DIR = "./COCO_dataset/val2014"
 TOTAL_DATA = 1000
