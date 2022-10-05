@@ -3,12 +3,14 @@ import json
 import tensorflow as tf
 import os
 import json
-from settings import (
-    PATH_VAL_DIR,
+from settings_inference import (
+    DATE_TO_EVALUATE,
+    TOKENIZER_PATH,
+    MODEL_CONFIG_PATH,
+    MODEL_WEIGHT_PATH,
+    PATH_TEST_DIR,
     TOTAL_DATA,
-    DATE_NOW,
 )
-from settings_inference import TOKENIZER_PATH, MODEL_CONFIG_PATH, MODEL_WEIGHT_PATH
 
 # Get tokenizer layer from disk
 tokenizer = tf.keras.models.load_model(TOKENIZER_PATH)
@@ -20,15 +22,19 @@ model = get_inference_model(MODEL_CONFIG_PATH)
 # Load model weights
 model.load_weights(MODEL_WEIGHT_PATH)
 
+# Create new directory for saving model
+NEW_DIR = "save_captions/" + DATE_TO_EVALUATE
+os.mkdir(NEW_DIR)
+
 list = []
 
 with open(MODEL_CONFIG_PATH) as json_file:
     model_config = json.load(json_file)
 
-for filename in os.listdir(PATH_VAL_DIR)[:TOTAL_DATA]:
+for filename in os.listdir(PATH_TEST_DIR)[:TOTAL_DATA]:
     dict = {}
-    image_id = filename.replace("COCO_val2014_", "").replace(".jpg", "").lstrip("0")
-    image_path = os.path.join(PATH_VAL_DIR, filename).replace("\\", "/")
+    image_id = filename.replace("COCO_test2014_", "").replace(".jpg", "").lstrip("0")
+    image_path = os.path.join(PATH_TEST_DIR, filename).replace("\\", "/")
     dict["image_id"] = int(image_id)
     dict["caption"] = generate_caption(
         image_path, model, tokenizer, model_config["SEQ_LENGTH"]
@@ -36,5 +42,5 @@ for filename in os.listdir(PATH_VAL_DIR)[:TOTAL_DATA]:
     print(filename, dict)
     list.append(dict)
 
-with open("captions_val2014_results_{}.json".format(DATE_NOW), "w") as fp:
+with open("{}/captions_test2014_results.json".format(NEW_DIR), "w") as fp:
     json.dump(list, fp)

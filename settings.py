@@ -27,13 +27,13 @@ EPOCHS = 14
 #### COCO dataset
 # Max number train dataset images : 68363
 # Max number valid dataset images : 33432
-REDUCE_DATASET = False
+REDUCE_DATASET = True
 # Number of train images -> it must be a value between [1, 68363]
-NUM_TRAIN_IMG = 68363
+NUM_TRAIN_IMG = 1000
 # Number of valid images -> it must be a value between [1, 33432]
 # N.B. -> IMPORTANT : the number of images of the test set is given by the difference between 33432 and NUM_VALID_IMG values.
 # for instance, with NUM_VALID_IMG = 20000 -> valid set have 20000 images and test set have the last 13432 images.
-NUM_VALID_IMG = 20000
+NUM_VALID_IMG = 50
 # Data augumention on train set
 TRAIN_SET_AUG = True
 # Data augmention on valid set
@@ -50,11 +50,3 @@ text_data_json_path = "COCO_dataset/text_data.json"
 
 # Save training files directory
 SAVE_DIR = "save_train_dir/"
-
-# Settings for coco_evaluation.py
-RESULT_DIR = "./results/captions_val2014_results.json"
-ANNOTATION_DIR = "./COCO_dataset/captions/captions_val2014.json"
-
-# Settings for generate_json.py
-PATH_VAL_DIR = "./COCO_dataset/val2014"
-TOTAL_DATA = 1000

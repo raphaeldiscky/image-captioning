@@ -70,7 +70,7 @@ tokenizer.adapt(text_data)
 
 # Define vocabulary size of Dataset
 VOCAB_SIZE = len(tokenizer.get_vocabulary())
-# print(VOCAB_SIZE)
+print("VOCAB_SIZE", VOCAB_SIZE)
 
 # 20k images for validation set and 13432 images for test set
 valid_data, test_data = valid_test_split(valid_data)

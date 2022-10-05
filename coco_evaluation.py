@@ -1,10 +1,10 @@
 from pycocotools.coco import COCO
 from pycocoevalcap.eval import COCOEvalCap
-from settings import RESULT_DIR, ANNOTATION_DIR
+from settings_evaluation import RESULT_CAPTIONS_PATH, TEST_ANNOTATION_PATH
 
 # create coco object and coco_result object
-coco = COCO(ANNOTATION_DIR)
-coco_result = coco.loadRes(RESULT_DIR)
+coco = COCO(TEST_ANNOTATION_PATH)
+coco_result = coco.loadRes(RESULT_CAPTIONS_PATH)
 
 # create coco_eval object by taking coco and coco_result
 coco_eval = COCOEvalCap(coco, coco_result)
