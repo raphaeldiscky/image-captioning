@@ -1,3 +1,4 @@
+from cmath import log
 import os
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -69,11 +70,12 @@ tokenizer = TextVectorization(
 tokenizer.adapt(text_data)
 
 # Define vocabulary size of Dataset
-VOCAB_SIZE = len(tokenizer.get_vocabulary())
-print("VOCAB_SIZE", VOCAB_SIZE)
+VOCAB_SIZE = 27277
+print(VOCAB_SIZE)
 
 # 20k images for validation set and 13432 images for test set
 valid_data, test_data = valid_test_split(valid_data)
+
 print("Number of validation samples after splitting with test set: ", len(valid_data))
 print("Number of test samples: ", len(test_data))
 
@@ -84,6 +86,9 @@ train_dataset = make_dataset(
     data_aug=TRAIN_SET_AUG,
     tokenizer=tokenizer,
 )
+
+print("TRAIIIN", train_dataset)
+
 valid_dataset = make_dataset(
     list(valid_data.keys()),
     list(valid_data.values()),
@@ -97,6 +102,7 @@ if TEST_SET:
         data_aug=False,
         tokenizer=tokenizer,
     )
+
 
 # Define Model
 cnn_model = get_cnn_model()

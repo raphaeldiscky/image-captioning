@@ -41,12 +41,13 @@ VALID_SET_AUG = False
 # If you want to calculate the performance on the test set.
 TEST_SET = True
 
-# Load train_data.json pathfile
-train_data_json_path = "COCO_dataset/captions_mapping_train.json"
-# Load valid_data.json pathfile
-valid_data_json_path = "COCO_dataset/captions_mapping_valid.json"
-# Load text_data.json pathfile
-text_data_json_path = "COCO_dataset/text_data.json"
+# train_data_json_path = "COCO_dataset/captions_mapping_train_english.json"
+# valid_data_json_path = "COCO_dataset/captions_mapping_valid_english.json"
+# text_data_json_path = "COCO_dataset/text_data_english.json"
+
+train_data_json_path = "COCO_dataset/mapped_captions_train2014.json"
+valid_data_json_path = "COCO_dataset/mapped_captions_val2014.json"
+text_data_json_path = "COCO_dataset/text_data_indo.json"
 
 # Save training files directory
 SAVE_DIR = "save_train_dir/"
