@@ -2,7 +2,6 @@ from utility import get_inference_model, generate_caption
 import json
 import tensorflow as tf
 import os
-import json
 from settings_inference import (
     DATE_TO_EVALUATE,
     TOKENIZER_PATH,

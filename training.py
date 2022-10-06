@@ -1,8 +1,29 @@
-from cmath import log
 import os
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
+from settings import (
+    BATCH_SIZE,
+    CCN_MODEL,
+    DATE_NOW,
+    EMBED_DIM,
+    EPOCHS,
+    FF_DIM,
+    IMAGE_SIZE,
+    NUM_HEADS,
+    NUM_TRAIN_IMG,
+    NUM_VALID_IMG,
+    SAVE_DIR,
+    VALID_SET_AUG,
+    train_data_json_path,
+    valid_data_json_path,
+    text_data_json_path,
+    REDUCE_DATASET,
+    MAX_VOCAB_SIZE,
+    SEQ_LENGTH,
+    TRAIN_SET_AUG,
+    TEST_SET,
+)
 from dataset import (
     make_dataset,
     custom_standardization,
@@ -18,31 +39,8 @@ from model import (
 )
 from utility import save_tokenizer
 import json
-import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
-import numpy as np
-from plot_training import plot_training
-from settings import (
-    BATCH_SIZE,
-    DATE_NOW,
-    EMBED_DIM,
-    EPOCHS,
-    FF_DIM,
-    IMAGE_SIZE,
-    NUM_HEADS,
-    SAVE_DIR,
-    VALID_SET_AUG,
-    train_data_json_path,
-    valid_data_json_path,
-    text_data_json_path,
-    REDUCE_DATASET,
-    MAX_VOCAB_SIZE,
-    SEQ_LENGTH,
-    TRAIN_SET_AUG,
-    TEST_SET,
-)
-
 
 # Load dataset
 with open(train_data_json_path) as json_file:
@@ -70,14 +68,14 @@ tokenizer = TextVectorization(
 tokenizer.adapt(text_data)
 
 # Define vocabulary size of Dataset
-VOCAB_SIZE = 27277
-print(VOCAB_SIZE)
+VOCAB_SIZE = len(tokenizer.get_vocabulary())
+print("VOCAB_SIZE", VOCAB_SIZE)
 
-# 20k images for validation set and 13432 images for test set
+# Split dataset to valid and test set
 valid_data, test_data = valid_test_split(valid_data)
 
-print("Number of validation samples after splitting with test set: ", len(valid_data))
-print("Number of test samples: ", len(test_data))
+print("Validation samples after splitting with test set: ", len(valid_data))
+print("Test samples: ", len(test_data))
 
 # Setting batch dataset
 train_dataset = make_dataset(
@@ -86,8 +84,6 @@ train_dataset = make_dataset(
     data_aug=TRAIN_SET_AUG,
     tokenizer=tokenizer,
 )
-
-print("TRAIIIN", train_dataset)
 
 valid_dataset = make_dataset(
     list(valid_data.keys()),
@@ -103,8 +99,7 @@ if TEST_SET:
         tokenizer=tokenizer,
     )
 
-
-# Define Model
+# Get Model
 cnn_model = get_cnn_model()
 
 encoder = TransformerEncoderBlock(
@@ -142,8 +137,6 @@ history = caption_model.fit(
     callbacks=[early_stopping],
 )
 
-plot_training(history)
-
 # Compute definitive metrics on train/valid set
 train_metrics = caption_model.evaluate(train_dataset, batch_size=BATCH_SIZE)
 valid_metrics = caption_model.evaluate(valid_dataset, batch_size=BATCH_SIZE)
@@ -169,11 +162,13 @@ os.mkdir(NEW_DIR)
 history_dict = history.history
 json.dump(history_dict, open(SAVE_DIR + "{}/history.json".format(DATE_NOW), "w"))
 
+
 # Save weights model
 caption_model.save_weights(SAVE_DIR + "{}/model_weights_coco.h5".format(DATE_NOW))
 
 # Save config model train
 config_train = {
+    "CCN_MODEL": CCN_MODEL,
     "IMAGE_SIZE": IMAGE_SIZE,
     "MAX_VOCAB_SIZE": MAX_VOCAB_SIZE,
     "SEQ_LENGTH": SEQ_LENGTH,
@@ -183,6 +178,8 @@ config_train = {
     "BATCH_SIZE": BATCH_SIZE,
     "EPOCHS": EPOCHS,
     "VOCAB_SIZE": VOCAB_SIZE,
+    "NUM_TRAIN_IMG": NUM_TRAIN_IMG,
+    "NUM_VALID_IMG": NUM_VALID_IMG,
 }
 
 json.dump(config_train, open(SAVE_DIR + "{}/config_train.json".format(DATE_NOW), "w"))

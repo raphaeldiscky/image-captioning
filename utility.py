@@ -54,6 +54,7 @@ def get_inference_model(model_config_path):
 
 def generate_caption(image_path, caption_model, tokenizer, SEQ_LENGTH):
     vocab = tokenizer.get_vocabulary()
+    print(len(vocab))
     index_lookup = dict(zip(range(len(vocab)), vocab))
     max_decoded_sentence_length = SEQ_LENGTH - 1
 

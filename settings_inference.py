@@ -1,5 +1,5 @@
 # @Settings for generate json and inference
-DATE_TO_EVALUATE = "04_10_2022_23_16_28"  # change this date
+DATE_TO_EVALUATE = "06_10_2022_10_10_27"  # change this date
 
 # Tokenizer model saved path
 TOKENIZER_PATH = "save_train_dir/{}/tokenizer".format(DATE_TO_EVALUATE)

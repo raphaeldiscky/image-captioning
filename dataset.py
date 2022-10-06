@@ -1,10 +1,6 @@
 import re
-import os
-import math
 import numpy as np
 import tensorflow as tf
-import tensorflow_addons as tfa
-import image_aug
 from settings import BATCH_SIZE, IMAGE_SIZE, NUM_TRAIN_IMG, NUM_VALID_IMG, SHUFFLE_DIM
 
 strip_chars = "!\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
@@ -18,14 +14,14 @@ def custom_standardization(input_string):
 
 
 def train_val_split(caption_data, train_size=0.8, shuffle=True):
-    # 1. Get the list of all image names
+    # Get the list of all image names
     all_images = list(caption_data.keys())
 
-    # 2. Shuffle if necessary
+    # Shuffle if necessary
     if shuffle:
         np.random.shuffle(all_images)
 
-    # 3. Split into training and validation sets
+    # Split into training and validation sets
     train_size = int(len(caption_data) * train_size)
 
     training_data = {
@@ -35,7 +31,7 @@ def train_val_split(caption_data, train_size=0.8, shuffle=True):
         img_name: caption_data[img_name] for img_name in all_images[train_size:]
     }
 
-    # 4. Return the splits
+    # Return the splits
     return training_data, validation_data
 
 
@@ -107,11 +103,6 @@ def read_image(data_aug):
 img_transf = tf.keras.Sequential(
     [
         tf.keras.layers.experimental.preprocessing.RandomContrast(factor=(0.05, 0.15)),
-        # image_aug.RandomBrightness(brightness_delta=(-0.15, 0.15)),
-        # image_aug.PowerLawTransform(gamma=(0.8,1.2)),
-        # image_aug.RandomSaturation(sat=(0, 2)),
-        # image_aug.RandomHue(hue=(0, 0.15)),
-        # tf.keras.layers.experimental.preprocessing.RandomFlip("horizontal"),
         tf.keras.layers.experimental.preprocessing.RandomTranslation(
             height_factor=(-0.10, 0.10), width_factor=(-0.10, 0.10)
         ),

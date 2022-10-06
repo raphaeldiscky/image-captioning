@@ -2,10 +2,12 @@ from datetime import datetime
 
 DATE_NOW = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
 
+# CNN Model
+CCN_MODEL = "imagenet"
 # Desired image dimensions
 IMAGE_SIZE = (299, 299)
 # Max vocabulary size
-MAX_VOCAB_SIZE = 2000000
+MAX_VOCAB_SIZE = 15000
 # Fixed length allowed for any sequence
 SEQ_LENGTH = 25
 # Dimension for the image embeddings and token embeddings
@@ -19,19 +21,17 @@ SHUFFLE_DIM = 512
 # Batch size
 BATCH_SIZE = 64
 # Numbers of training epochs
-EPOCHS = 14
+EPOCHS = 1
 
-# Reduce Dataset
-# If you want reduce number of train/valid images dataset, set 'REDUCE_DATASET=True'
-# and set number of train/valid images that you want.
+
 #### COCO dataset
-# Max number train dataset images : 68363
-# Max number valid dataset images : 33432
-REDUCE_DATASET = True
-# Number of train images -> it must be a value between [1, 68363]
+# Max number train dataset images : 82783
+# Max number valid dataset images : 40504
+REDUCE_DATASET = False
+# Number of train images -> it must be a value between [1, 82783]
 NUM_TRAIN_IMG = 1000
-# Number of valid images -> it must be a value between [1, 33432]
-# N.B. -> IMPORTANT : the number of images of the test set is given by the difference between 33432 and NUM_VALID_IMG values.
+# Number of valid images -> it must be a value between [1, 40504]
+# N.B. -> IMPORTANT : the number of images of the test set is given by the difference between 40504 and NUM_VALID_IMG values.
 # for instance, with NUM_VALID_IMG = 20000 -> valid set have 20000 images and test set have the last 13432 images.
 NUM_VALID_IMG = 50
 # Data augumention on train set

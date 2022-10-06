@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-# @tf.keras.utils.register_keras_serializable()
+
 class custom_schedule(tf.keras.optimizers.schedules.LearningRateSchedule):
     def __init__(self, d_model, warmup_steps=4000):
         super(custom_schedule, self).__init__()
