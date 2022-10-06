@@ -1,7 +1,13 @@
 import re
 import numpy as np
 import tensorflow as tf
-from settings import BATCH_SIZE, IMAGE_SIZE, NUM_TRAIN_IMG, NUM_VALID_IMG, SHUFFLE_DIM
+from settings_training import (
+    BATCH_SIZE,
+    IMAGE_SIZE,
+    NUM_TRAIN_IMG,
+    NUM_VALID_IMG,
+    SHUFFLE_DIM,
+)
 
 strip_chars = "!\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
 AUTOTUNE = tf.data.AUTOTUNE

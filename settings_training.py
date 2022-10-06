@@ -5,7 +5,7 @@ DATE_NOW = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
 # CNN Model
 CCN_MODEL = "imagenet"
 # Desired image dimensions
-IMAGE_SIZE = (299, 299)
+IMAGE_SIZE = (256, 256)
 # Max vocabulary size
 MAX_VOCAB_SIZE = 20000
 # Fixed length allowed for any sequence
@@ -15,13 +15,13 @@ EMBED_DIM = 512
 # Number of self-attention heads
 NUM_HEADS = 8
 # Per-layer units in the feed-forward network
-FF_DIM = 1024
+FF_DIM = 2048
 # Shuffle dataset dim on tf.data.Dataset
 SHUFFLE_DIM = 512
 # Batch size
 BATCH_SIZE = 64
 # Numbers of training epochs
-EPOCHS = 10
+EPOCHS = 1
 
 
 # Use karpathy's split of dataset into train, val, test
@@ -41,13 +41,15 @@ VALID_SET_AUG = False
 # If you want to calculate the performance on the test set.
 TEST_SET = True
 
-# train_data_json_path = "COCO_dataset/captions_mapping_train_english.json"
-# valid_data_json_path = "COCO_dataset/captions_mapping_valid_english.json"
-# text_data_json_path = "COCO_dataset/text_data_english.json"
-
+# For INDO dataset
 train_data_json_path = "COCO_dataset/karpathy_train2014_indo.json"
 valid_data_json_path = "COCO_dataset/karpathy_val2014_indo.json"
 text_data_json_path = "COCO_dataset/text_data_indo.json"
 
 # Save training files directory
 SAVE_DIR = "save_train_dir/"
+
+## For ENGLISH dataset
+# train_data_json_path = "COCO_dataset/captions_mapping_train_english.json"
+# valid_data_json_path = "COCO_dataset/captions_mapping_valid_english.json"
+# text_data_json_path = "COCO_dataset/text_data_english.json"

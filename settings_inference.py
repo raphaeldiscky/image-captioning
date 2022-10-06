@@ -1,6 +1,6 @@
-# @Settings for generate json and inference
 DATE_TO_EVALUATE = "06_10_2022_13_46_30"  # change this date
 
+# For inference.py and inference_all.py
 # Tokenizer model saved path
 TOKENIZER_PATH = "save_train_dir/{}/tokenizer".format(DATE_TO_EVALUATE)
 # Config model saved path
@@ -8,6 +8,9 @@ MODEL_CONFIG_PATH = "save_train_dir/{}/config_train.json".format(DATE_TO_EVALUAT
 # Model weight path
 MODEL_WEIGHT_PATH = "save_train_dir/{}/model_weights_coco.h5".format(DATE_TO_EVALUATE)
 
-PATH_VAL_DIR = "./COCO_dataset/val2014"
-PATH_TEST_DIR = "./COCO_dataset/test2014"
-TOTAL_DATA = 5000
+
+# For inference_all.py
+RAW_VAL_IMAGES_DIR = "./COCO_dataset/val2014"
+RAW_TEST_IMAGES_DIR = "./COCO_dataset/test2014"
+DATA_TYPE = "val2014"  # change this to "test2014" for testing
+LIMIT_LENGTH_DATA = 10

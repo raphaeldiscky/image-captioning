@@ -2,7 +2,7 @@ import os
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-from settings import (
+from settings_training import (
     BATCH_SIZE,
     CCN_MODEL,
     DATE_NOW,
@@ -165,6 +165,15 @@ json.dump(history_dict, open(SAVE_DIR + "{}/history.json".format(DATE_NOW), "w")
 
 # Save weights model
 caption_model.save_weights(SAVE_DIR + "{}/model_weights_coco.h5".format(DATE_NOW))
+
+# Save metrics results
+metrics_results = {
+    "TRAIN_SET":  "Train Loss = %.4f - Train Accuracy = %.4f" % (train_metrics[0], train_metrics[1]),
+    "VALID_SET":  "Valid Loss = %.4f - Valid Accuracy = %.4f" % (valid_metrics[0], valid_metrics[1]),
+    "TEST_SET":  "Test Loss = %.4f - Test Accuracy = %.4f" % (test_metrics[0], test_metrics[1]),
+}
+
+json.dump(metrics_results, open(SAVE_DIR + "{}/metrics_results.json".format(DATE_NOW), "w"))
 
 # Save config model train
 config_train = {

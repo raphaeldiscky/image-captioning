@@ -1,7 +1,7 @@
 from settings_inference import DATE_TO_EVALUATE
 
 # Settings for coco_evaluation.py
-RESULT_CAPTIONS_PATH = "./save_captions/{}/captions_val2014_results.json".format(
+RESULT_CAPTIONS_PATH = "./save_captions/{}/captions_val2014_results_indo.json".format(
     DATE_TO_EVALUATE
 )
 

@@ -7,19 +7,19 @@ from settings_inference import (
     TOKENIZER_PATH,
     MODEL_CONFIG_PATH,
     MODEL_WEIGHT_PATH,
-    RAW_VAL_IMAGES_DIR,
-    RAW_TEST_IMAGES_DIR,
-    LIMIT_LENGTH_DATA,
-    DATA_TYPE,
+    PATH_VAL_DIR,
+    TOTAL_DATA,
+    karpathy_train_indo_path,
+    karpathy_val_indo_path,
 )
 
-SELECTED_RAW_IMAGES_DIR = (
-    RAW_VAL_IMAGES_DIR
-    if DATA_TYPE == "val2014"
-    else RAW_TEST_IMAGES_DIR
-    if DATA_TYPE == "test2014"
-    else None
-)
+with open(karpathy_train_indo_path) as json_file:
+    karpathy_val = json.load(json_file)
+
+with open(karpathy_val_indo_path) as json_file:
+    karpathy_val = json.load(json_file)
+
+DATA_TYPE = "val2014"
 
 # Get tokenizer layer from disk
 tokenizer = tf.keras.models.load_model(TOKENIZER_PATH)
@@ -36,37 +36,25 @@ list = []
 with open(MODEL_CONFIG_PATH) as json_file:
     model_config = json.load(json_file)
 
-# Looping through images in the selected directory
-for filename in os.listdir(SELECTED_RAW_IMAGES_DIR)[:LIMIT_LENGTH_DATA]:
+for filename in os.listdir(PATH_VAL_DIR)[:TOTAL_DATA]:
     dict = {}
     image_id = (
         filename.replace("COCO_{}_".format(DATA_TYPE), "")
         .replace(".jpg", "")
         .lstrip("0")
     )
-    image_path = os.path.join(SELECTED_RAW_IMAGES_DIR, filename).replace("\\", "/")
+    image_path = os.path.join(PATH_VAL_DIR, filename).replace("\\", "/")
     dict["image_id"] = int(image_id)
-    dict["caption"] = generate_caption(
+    dict["reference"] = []
+    dict["candidate"] = generate_caption(
         image_path, model, tokenizer, model_config["SEQ_LENGTH"]
     )
     print("FILENAME: ", filename, "DICT: ", dict)
     list.append(dict)
 
 # Create new directory for saving model
-SAVE_DIR = "save_captions/" + DATE_TO_EVALUATE
-os.mkdir(SAVE_DIR)
+NEW_DIR = "save_captions/" + DATE_TO_EVALUATE
+os.mkdir(NEW_DIR)
 
-
-with open("{}/captions_{}_results_indo.json".format(SAVE_DIR, DATA_TYPE), "w") as fp:
+with open("{}/captions_{}_results_indo.json".format(NEW_DIR, DATA_TYPE), "w") as fp:
     json.dump(list, fp)
-
-# Save config inference
-config_inference_all = {
-    "MODEL_CONFIG_PATH": MODEL_CONFIG_PATH,
-    "MODEL_WEIGHT_PATH": MODEL_WEIGHT_PATH,
-    "DATA_TYPE": DATA_TYPE,
-    "LIMIT_LENGTH_DATA": LIMIT_LENGTH_DATA,
-}
-
-
-json.dump(config_inference_all, open(SAVE_DIR + "/config_inference_all.json", "w"))

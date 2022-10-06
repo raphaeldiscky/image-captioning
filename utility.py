@@ -1,8 +1,5 @@
 import tensorflow as tf
-from settings import IMAGE_SIZE
-from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
-from custom_schedule import custom_schedule
-from tensorflow import keras
+from settings_training import IMAGE_SIZE
 from model import (
     get_cnn_model,
     TransformerEncoderBlock,
@@ -12,7 +9,6 @@ from model import (
 from dataset import read_image_inf
 import numpy as np
 import json
-import re
 
 
 def save_tokenizer(tokenizer, path_save):
@@ -42,12 +38,11 @@ def get_inference_model(model_config_path):
         cnn_model=cnn_model, encoder=encoder, decoder=decoder
     )
 
-    ##### It's necessary for init model -> without it, weights subclass model fails
+    # It's necessary for init model -> without it, weights subclass model fails
     cnn_input = tf.keras.layers.Input(shape=(IMAGE_SIZE[0], IMAGE_SIZE[1], 3))
     training = False
     decoder_input = tf.keras.layers.Input(shape=(None,))
     caption_model([cnn_input, training, decoder_input])
-    #####
 
     return caption_model
 

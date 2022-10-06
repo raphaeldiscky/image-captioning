@@ -1,5 +1,5 @@
 import tensorflow as tf
-from settings import EMBED_DIM, IMAGE_SIZE, SEQ_LENGTH
+from settings_training import EMBED_DIM, IMAGE_SIZE, SEQ_LENGTH
 from tensorflow.keras import layers
 from tensorflow import keras
 from tensorflow.keras.applications import efficientnet
@@ -101,13 +101,12 @@ class TransformerDecoderBlock(layers.Layer):
             padding_mask = tf.cast(mask[:, :, tf.newaxis], dtype=tf.int32)
             combined_mask = tf.cast(mask[:, tf.newaxis, :], dtype=tf.int32)
             combined_mask = tf.minimum(combined_mask, causal_mask)
-        ###
         else:
             combined_mask = None
             padding_mask = None
 
         attention_output_1 = self.attention_1(
-            query=inputs, value=inputs, key=inputs, attention_mask=combined_mask  # None
+            query=inputs, value=inputs, key=inputs, attention_mask=combined_mask
         )
         out_1 = self.layernorm_1(inputs + attention_output_1)
 
@@ -115,7 +114,7 @@ class TransformerDecoderBlock(layers.Layer):
             query=out_1,
             value=encoder_outputs,
             key=encoder_outputs,
-            attention_mask=padding_mask,  # None
+            attention_mask=padding_mask,
         )
         out_2 = self.layernorm_2(out_1 + attention_output_2)
 
