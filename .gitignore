@@ -1,7 +1,9 @@
 __pycache__/
 save_train_dir/*
+save_captions/*
 COCO_dataset/captions
 COCO_dataset/test2014
 COCO_dataset/train2014
 COCO_dataset/val2014
 captions_val2014_results.json
+

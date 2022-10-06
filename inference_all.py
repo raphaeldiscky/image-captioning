@@ -7,7 +7,7 @@ from settings_inference import (
     TOKENIZER_PATH,
     MODEL_CONFIG_PATH,
     MODEL_WEIGHT_PATH,
-    PATH_TEST_DIR,
+    PATH_VAL_DIR,
     TOTAL_DATA,
 )
 
@@ -21,25 +21,25 @@ model = get_inference_model(MODEL_CONFIG_PATH)
 # Load model weights
 model.load_weights(MODEL_WEIGHT_PATH)
 
-# Create new directory for saving model
-NEW_DIR = "save_captions/" + DATE_TO_EVALUATE
-os.mkdir(NEW_DIR)
-
 list = []
 
 with open(MODEL_CONFIG_PATH) as json_file:
     model_config = json.load(json_file)
 
-for filename in os.listdir(PATH_TEST_DIR)[:TOTAL_DATA]:
+for filename in os.listdir(PATH_VAL_DIR)[:TOTAL_DATA]:
     dict = {}
-    image_id = filename.replace("COCO_test2014_", "").replace(".jpg", "").lstrip("0")
-    image_path = os.path.join(PATH_TEST_DIR, filename).replace("\\", "/")
+    image_id = filename.replace("COCO_val2014_", "").replace(".jpg", "").lstrip("0")
+    image_path = os.path.join(PATH_VAL_DIR, filename).replace("\\", "/")
     dict["image_id"] = int(image_id)
     dict["caption"] = generate_caption(
         image_path, model, tokenizer, model_config["SEQ_LENGTH"]
     )
-    print(filename, dict)
+    print("FILENAME: ", filename, "DICT: ", dict)
     list.append(dict)
 
-with open("{}/captions_test2014_results.json".format(NEW_DIR), "w") as fp:
+# Create new directory for saving model
+NEW_DIR = "save_captions/" + DATE_TO_EVALUATE
+os.mkdir(NEW_DIR)
+
+with open("{}/captions_val2014_results_indo.json".format(NEW_DIR), "w") as fp:
     json.dump(list, fp)
