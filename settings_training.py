@@ -3,7 +3,7 @@ from datetime import datetime
 DATE_NOW = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
 
 # CNN Model
-CCN_MODEL = "imagenet"
+CCN_MODEL = "efficientnet"
 # Desired image dimensions
 IMAGE_SIZE = (256, 256)
 # Max vocabulary size
@@ -21,7 +21,7 @@ SHUFFLE_DIM = 512
 # Batch size
 BATCH_SIZE = 64
 # Numbers of training epochs
-EPOCHS = 1
+EPOCHS = 10
 
 
 # Use karpathy's split of dataset into train, val, test
@@ -38,8 +38,6 @@ NUM_VALID_IMG = 5000
 TRAIN_SET_AUG = True
 # Data augmention on valid set
 VALID_SET_AUG = False
-# If you want to calculate the performance on the test set.
-TEST_SET = True
 
 # For INDO dataset
 train_data_json_path = "COCO_dataset/karpathy_train2014_indo.json"
