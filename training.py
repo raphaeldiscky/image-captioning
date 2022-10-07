@@ -53,7 +53,7 @@ with open(text_data_json_path) as json_file:
 # For reduce number of images in the dataset
 if REDUCE_DATASET:
     train_data, valid_data = reduce_dataset_dim(train_data, valid_data)
-    
+
 print("Number of training samples: ", len(train_data))
 print("Number of validation samples: ", len(valid_data))
 
@@ -138,7 +138,7 @@ history = caption_model.fit(
     callbacks=[early_stopping],
 )
 
-# Compute definitive metrics on train/valid set
+# Compute definitive metrics on train/valid/test set
 train_metrics = caption_model.evaluate(train_dataset, batch_size=BATCH_SIZE)
 valid_metrics = caption_model.evaluate(valid_dataset, batch_size=BATCH_SIZE)
 test_metrics = caption_model.evaluate(test_dataset, batch_size=BATCH_SIZE)
