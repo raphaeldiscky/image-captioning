@@ -1,4 +1,4 @@
-DATE_TO_EVALUATE = "18_10_2022_21_20_17"  # change this date
+DATE_TO_EVALUATE = "19_10_2022_19_26_19"  # change this date
 
 # Settings for coco_evaluation.py
 INFERENCE_ALL_RESULT_PATH = (

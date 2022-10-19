@@ -8,11 +8,11 @@ from tensorflow.keras.applications import efficientnet, resnet
 def get_cnn_model():
     if CCN_MODEL == "efficientnet":
         base_model = efficientnet.EfficientNetB0(
-            include_top=False, weights="imagenet", input_shape=IMAGE_SIZE + (3,)
+            include_top=False, weights="imagenet", input_shape=(*IMAGE_SIZE, 3)
         )
     elif CCN_MODEL == "resnet":
         base_model = resnet.ResNet101(
-            include_top=False, weights="imagenet", input_shape=IMAGE_SIZE + (3,)
+            include_top=False, weights="imagenet", input_shape=(*IMAGE_SIZE, 3)
         )
 
     # Freeze feature extractor layers

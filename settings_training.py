@@ -21,7 +21,7 @@ SHUFFLE_DIM = 512
 # Batch size
 BATCH_SIZE = 64
 # Numbers of training epochs
-EPOCHS = 3
+EPOCHS = 20
 
 
 # Use karpathy's split of dataset into train, val, test
