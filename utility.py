@@ -62,7 +62,7 @@ def generate_caption(image_path, caption_model, tokenizer, SEQ_LENGTH):
     encoded_img = caption_model.encoder(img, training=False)
 
     # Generate the caption using the Transformer decoder
-    decoded_caption = "sos"
+    decoded_caption = "<start>"
     for i in range(max_decoded_sentence_length):
         tokenized_caption = tokenizer([decoded_caption])[:, :-1]
         # tokenized_caption = tokenizer.predict([decoded_caption])[:, :-1]
@@ -72,8 +72,8 @@ def generate_caption(image_path, caption_model, tokenizer, SEQ_LENGTH):
         )
         sampled_token_index = np.argmax(predictions[0, i, :])
         sampled_token = index_lookup[sampled_token_index]
-        if sampled_token == "eos":
+        if sampled_token == "<end>":
             break
         decoded_caption += " " + sampled_token
 
-    return decoded_caption.replace("sos ", "")
+    return decoded_caption.replace("<start> ", "")

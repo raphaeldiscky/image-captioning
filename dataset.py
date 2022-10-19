@@ -9,7 +9,7 @@ from settings_training import (
     SHUFFLE_DIM,
 )
 
-strip_chars = "!\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
+strip_chars = "!\"#$%&'()*+,-./:;=?@[\]^_`{|}~"
 AUTOTUNE = tf.data.AUTOTUNE
 
 

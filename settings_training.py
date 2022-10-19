@@ -21,7 +21,7 @@ SHUFFLE_DIM = 512
 # Batch size
 BATCH_SIZE = 64
 # Numbers of training epochs
-EPOCHS = 10
+EPOCHS = 3
 
 
 # Use karpathy's split of dataset into train, val, test
@@ -46,8 +46,3 @@ text_data_json_path = "datasets/text_data_indo.json"
 
 # Save training files directory
 SAVE_DIR = "save_train_dir/"
-
-## For ENGLISH dataset
-# train_data_json_path = "datasets/captions_mapping_train_english.json"
-# valid_data_json_path = "datasets/captions_mapping_valid_english.json"
-# text_data_json_path = "datasets/text_data_english.json"
