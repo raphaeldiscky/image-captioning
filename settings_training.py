@@ -2,7 +2,7 @@ from datetime import datetime
 
 DATE_NOW = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
 
-# CNN Model
+# CNN Model (efficientnet/resnet)
 CCN_MODEL = "efficientnet"
 # Desired image dimensions
 IMAGE_SIZE = (256, 256)
@@ -39,15 +39,15 @@ TRAIN_SET_AUG = True
 # Data augmention on valid set
 VALID_SET_AUG = False
 
-# For INDO dataset
-train_data_json_path = "COCO_dataset/karpathy_train2014_indo.json"
-valid_data_json_path = "COCO_dataset/karpathy_val2014_indo.json"
-text_data_json_path = "COCO_dataset/text_data_indo.json"
+# For Indonesian dataset
+train_data_json_path = "datasets/karpathy_train2014_indo.json"
+valid_data_json_path = "datasets/karpathy_val2014_indo.json"
+text_data_json_path = "datasets/text_data_indo.json"
 
 # Save training files directory
 SAVE_DIR = "save_train_dir/"
 
 ## For ENGLISH dataset
-# train_data_json_path = "COCO_dataset/captions_mapping_train_english.json"
-# valid_data_json_path = "COCO_dataset/captions_mapping_valid_english.json"
-# text_data_json_path = "COCO_dataset/text_data_english.json"
+# train_data_json_path = "datasets/captions_mapping_train_english.json"
+# valid_data_json_path = "datasets/captions_mapping_valid_english.json"
+# text_data_json_path = "datasets/text_data_english.json"

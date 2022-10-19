@@ -17,12 +17,12 @@ The model has been trained on 2014 Train/Val COCO dataset.
 You can download the dataset [here](https://cocodataset.org/#download). Note that test images are not required for this code to work.</br></br>
 Original dataset has 82783 train images and 40504 validation images; for each image there is a number of captions between 1 and 6. I have preprocessing the dataset per to keep only images that have exactly 5 captions. In fact, **_the model has been trained to ensure that 5 captions are assigned for each image_**. After this filtering, the final dataset has 68363 train images and 33432 validation images.</br>
 Finally, I serialized the dataset into two json files which you can find in:</br></br>
-`COCO_dataset/captions_mapping_train.json` </br>
-`COCO_dataset/captions_mapping_valid.json` </br></br>
+`datasets/captions_mapping_train.json` </br>
+`datasets/captions_mapping_valid.json` </br></br>
 Each element in the _captions_mapping_train.json_ file has such a structure :</br>
-`"COCO_dataset/train2014/COCO_train2014_000000318556.jpg": ["caption1", "caption2", "caption3", "caption4", "caption5"], ...` </br></br>
+`"datasets/train2014/COCO_train2014_000000318556.jpg": ["caption1", "caption2", "caption3", "caption4", "caption5"], ...` </br></br>
 In same way in the _captions_mapping_valid.json_ :</br>
-`"COCO_dataset/val2014/COCO_val2014_000000203564.jpg": ["caption1", "caption2", "caption3", "caption4", "caption5"], ...` </br>
+`"datasets/val2014/COCO_val2014_000000203564.jpg": ["caption1", "caption2", "caption3", "caption4", "caption5"], ...` </br>
 
 ## Dependencies
 
@@ -38,7 +38,7 @@ I have used the following versions for code work:
 
 To train the model you need to follow the following steps :
 
-1. you have to make sure that the training set images are in the folder `COCO_dataset/train2014/` and that validation set images are in `COCO_dataset/val2014/`.
+1. you have to make sure that the training set images are in the folder `datasets/train2014/` and that validation set images are in `datasets/val2014/`.
 2. you have to enter all the parameters necessary for the training in the `settings.py` file.
 3. start the model training with `python3 training.py`
 
@@ -87,11 +87,11 @@ VALID_SET_AUG = False
 TEST_SET = True
 
 # Load train_data.json pathfile
-train_data_json_path = "COCO_dataset/captions_mapping_train.json"
+train_data_json_path = "datasets/captions_mapping_train.json"
 # Load valid_data.json pathfile
-valid_data_json_path = "COCO_dataset/captions_mapping_valid.json"
+valid_data_json_path = "datasets/captions_mapping_valid.json"
 # Load text_data.json pathfile
-text_data_json_path  = "COCO_dataset/text_data.json"
+text_data_json_path  = "datasets/text_data.json"
 
 # Save training files directory
 SAVE_DIR = "save_train_dir/model_weights/"

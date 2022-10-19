@@ -1,4 +1,4 @@
-DATE_TO_EVALUATE = "04_10_2022_23_16_28"  # change this date
+DATE_TO_EVALUATE = "18_10_2022_21_20_17"  # change this date
 
 # For inference.py and inference_all.py
 # Tokenizer model saved path
@@ -10,7 +10,7 @@ MODEL_WEIGHT_PATH = "save_train_dir/{}/model_weights_coco.h5".format(DATE_TO_EVA
 
 
 # For inference_all.py
-RAW_VAL_IMAGES_DIR = "./COCO_dataset/val2014"
-RAW_TEST_IMAGES_DIR = "./COCO_dataset/test2014"
+RAW_VAL_IMAGES_DIR = "./datasets/val2014"
+RAW_TEST_IMAGES_DIR = "./datasets/test2014"
 DATA_TYPE = "val2014"  # change this to "test2014" for testing or "val2014"
 LIMIT_LENGTH_DATA = 5000
