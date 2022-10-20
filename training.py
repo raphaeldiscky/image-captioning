@@ -119,7 +119,9 @@ cross_entropy = keras.losses.SparseCategoricalCrossentropy(
 )
 
 # EarlyStopping criteria
-early_stopping = keras.callbacks.EarlyStopping(patience=3, restore_best_weights=True)
+early_stopping = keras.callbacks.EarlyStopping(
+    monitor="val_loss", patience=4, restore_best_weights=True
+)
 
 # Create a learning rate schedule
 lr_scheduler = custom_schedule(EMBED_DIM)
@@ -135,7 +137,7 @@ history = caption_model.fit(
     train_dataset,
     epochs=EPOCHS,
     validation_data=valid_dataset,
-    callbacks=[early_stopping],
+    # callbacks=[early_stopping],
 )
 
 # Compute definitive metrics on train/valid/test set

@@ -10,16 +10,21 @@ def get_cnn_model():
         base_model = efficientnet.EfficientNetB0(
             include_top=False, weights="imagenet", input_shape=(*IMAGE_SIZE, 3)
         )
+        # Freeze feature extractor layers
+        base_model.trainable = False
+        base_model_out = base_model.output
+        base_model_out = layers.Reshape((-1, 1280))(base_model_out)
+        cnn_model = keras.models.Model(base_model.input, base_model_out)
     elif CCN_MODEL == "resnet":
         base_model = resnet.ResNet101(
             include_top=False, weights="imagenet", input_shape=(*IMAGE_SIZE, 3)
         )
-
-    # Freeze feature extractor layers
-    base_model.trainable = False
-    base_model_out = base_model.output
-    base_model_out = layers.Reshape((-1, 1280))(base_model_out)
-    cnn_model = keras.models.Model(base_model.input, base_model_out)
+        # Freeze feature extractor layers
+        base_model.trainable = False
+        base_model_out = base_model.output
+        base_model_out = layers.Reshape((-1, 2048))(base_model_out)
+        cnn_model = keras.models.Model(base_model.input, base_model_out)
+    print("MODEL: ", cnn_model.summary())
     return cnn_model
 
 

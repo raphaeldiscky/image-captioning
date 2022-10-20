@@ -1,4 +1,4 @@
-DATE_TO_EVALUATE = "19_10_2022_19_26_19"  # change this date
+DATE_TO_EVALUATE = "20_10_2022_12_21_39"  # change this date
 
 # For inference.py and inference_all.py
 # Tokenizer model saved path
