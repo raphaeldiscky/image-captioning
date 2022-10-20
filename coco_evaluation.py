@@ -7,6 +7,7 @@ from settings_evaluation import (
 )
 import json
 import os
+import shutil
 
 results = []
 
@@ -33,6 +34,18 @@ for metric, score in coco_eval.eval.items():
     results.append(f"{metric}: {score:.3f}")
 
 SAVE_DIR = "save_evaluations/" + DATE_TO_EVALUATE
-os.makedirs(SAVE_DIR)
+
+if not os.path.exists(SAVE_DIR):
+    os.makedirs(SAVE_DIR)
 
 json.dump(results, open(SAVE_DIR + "/evaluation_results.json", "w"))
+
+# copy training config and result to save_evaluations
+original = "save_train_dir/" + DATE_TO_EVALUATE + "/config_train.json"
+target = SAVE_DIR + "/training_config.json"
+shutil.copyfile(original, target)
+
+# copy training history to save_evaluations
+original = "save_train_dir/" + DATE_TO_EVALUATE + "/history.json"
+target = SAVE_DIR + "/history.json"
+shutil.copyfile(original, target)
