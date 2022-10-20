@@ -3,7 +3,7 @@ from datetime import datetime
 DATE_NOW = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
 
 # CNN Model (efficientnet/resnet)
-CCN_MODEL = "resnet"
+CCN_MODEL = "efficientnet"
 # Desired image dimensions
 IMAGE_SIZE = (256, 256)
 # Max vocabulary size
@@ -21,7 +21,7 @@ SHUFFLE_DIM = 512
 # Batch size
 BATCH_SIZE = 64
 # Numbers of training epochs
-EPOCHS = 20
+EPOCHS = 24
 
 
 # Use karpathy's split of dataset into train, val, test

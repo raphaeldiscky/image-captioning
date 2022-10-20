@@ -137,7 +137,7 @@ history = caption_model.fit(
     train_dataset,
     epochs=EPOCHS,
     validation_data=valid_dataset,
-    # callbacks=[early_stopping],
+    callbacks=[early_stopping],
 )
 
 # Compute definitive metrics on train/valid/test set

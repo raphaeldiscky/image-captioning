@@ -9,7 +9,7 @@ with open("./save_train_dir/{}/history.json".format(DATE_TO_EVALUATE)) as json_f
 def plot_training():
     plt.plot(history_dict["acc"], label="training accuracy")
     plt.plot(history_dict["val_acc"], label="val accuracy")
-    plt.title("Model Accuracy")
+    plt.title("Model Accuracy: {}".format(DATE_TO_EVALUATE))
     plt.xlabel("epochs")
     plt.ylabel("accuracy")
     plt.legend()
@@ -17,7 +17,7 @@ def plot_training():
 
     plt.plot(history_dict["loss"], label="training loss")
     plt.plot(history_dict["val_loss"], label="val loss")
-    plt.title("Model Loss")
+    plt.title("Model Loss: {}".format(DATE_TO_EVALUATE))
     plt.xlabel("epochs")
     plt.ylabel("loss")
     plt.legend()
