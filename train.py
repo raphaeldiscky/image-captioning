@@ -2,7 +2,7 @@ import os
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
-from settings_training import (
+from settings_train import (
     BATCH_SIZE,
     CCN_MODEL,
     DATE_NOW,
@@ -24,25 +24,25 @@ from settings_training import (
     SEQ_LENGTH,
     TRAIN_SET_AUG,
 )
-from dataset import (
+from datasets import (
     make_dataset,
     custom_standardization,
     reduce_dataset_dim,
     valid_test_split,
 )
 from custom_schedule import custom_schedule
-from model import (
+from models import (
     get_cnn_model,
     TransformerEncoderBlock,
     TransformerDecoderBlock,
     ImageCaptioningModel,
 )
-from utility import save_tokenizer
+from utils import save_tokenizer
 import json
 from tensorflow import keras
 from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
 
-# Load dataset
+# load dataset
 with open(train_data_json_path) as json_file:
     train_data = json.load(json_file)
 with open(valid_data_json_path) as json_file:
@@ -50,14 +50,14 @@ with open(valid_data_json_path) as json_file:
 with open(text_data_json_path) as json_file:
     text_data = json.load(json_file)
 
-# For reduce number of images in the dataset
+# for reduce number of images in the dataset
 if REDUCE_DATASET:
     train_data, valid_data = reduce_dataset_dim(train_data, valid_data)
 
 print("Number of training samples: ", len(train_data))
 print("Number of validation samples: ", len(valid_data))
 
-# Define tokenizer of Text Dataset
+# define tokenizer of Text Dataset
 tokenizer = TextVectorization(
     max_tokens=MAX_VOCAB_SIZE,
     output_mode="int",
@@ -65,18 +65,18 @@ tokenizer = TextVectorization(
     standardize=custom_standardization,
 )
 
-# Adapt tokenizer to Text Dataset
+# adapt tokenizer to Text Dataset
 tokenizer.adapt(text_data)
 
-# Define vocabulary size of Dataset
+# define vocabulary size of Dataset
 VOCAB_SIZE = len(tokenizer.get_vocabulary())
-print("VOCAB_SIZE", VOCAB_SIZE)
+print("Vocab size: ", VOCAB_SIZE)
 
 # Split dataset to valid and test set
 valid_data, test_data = valid_test_split(valid_data)
 
-print("Validation samples after splitting with test set: ", len(valid_data))
-print("Test samples: ", len(test_data))
+print("Validation data after splitting with test set: ", len(valid_data))
+print("Test data: ", len(test_data))
 
 # Setting batch dataset
 train_dataset = make_dataset(
@@ -100,7 +100,7 @@ test_dataset = make_dataset(
     tokenizer=tokenizer,
 )
 
-# Get Model
+# get Model
 cnn_model = get_cnn_model()
 
 encoder = TransformerEncoderBlock(
@@ -113,26 +113,26 @@ caption_model = ImageCaptioningModel(
     cnn_model=cnn_model, encoder=encoder, decoder=decoder
 )
 
-# Define the loss function
+# define the loss function
 cross_entropy = keras.losses.SparseCategoricalCrossentropy(
     from_logits=True, reduction="none"
 )
 
-# EarlyStopping criteria
+# earlyStopping
 early_stopping = keras.callbacks.EarlyStopping(
     monitor="val_loss", patience=4, restore_best_weights=True
 )
 
-# Create a learning rate schedule
+# create a learning rate schedule
 lr_scheduler = custom_schedule(EMBED_DIM)
 optimizer = keras.optimizers.Adam(
     learning_rate=lr_scheduler, beta_1=0.9, beta_2=0.98, epsilon=1e-9
 )
 
-# Compile the model
+# compile the model
 caption_model.compile(optimizer=optimizer, loss=cross_entropy)
 
-# Fit the model
+# fit the model
 history = caption_model.fit(
     train_dataset,
     epochs=EPOCHS,
@@ -140,7 +140,7 @@ history = caption_model.fit(
     callbacks=[early_stopping],
 )
 
-# Compute definitive metrics on train/valid/test set
+# compute definitive metrics on train/valid/test set
 train_metrics = caption_model.evaluate(train_dataset, batch_size=BATCH_SIZE)
 valid_metrics = caption_model.evaluate(valid_dataset, batch_size=BATCH_SIZE)
 test_metrics = caption_model.evaluate(test_dataset, batch_size=BATCH_SIZE)
@@ -153,19 +153,19 @@ print(
 )
 print("Test Loss = %.4f - Test Accuracy = %.4f" % (test_metrics[0], test_metrics[1]))
 
-# Create new directory for saving model
+# create new directory for saving model
 NEW_DIR = SAVE_DIR + DATE_NOW
 os.mkdir(NEW_DIR)
 
-# Save training history under the form of a json file
+# save training history under the form of a json file
 history_dict = history.history
 json.dump(history_dict, open(SAVE_DIR + "{}/history.json".format(DATE_NOW), "w"))
 
 
-# Save weights model
+# save weights model
 caption_model.save_weights(SAVE_DIR + "{}/model_weights_coco.h5".format(DATE_NOW))
 
-# Save metrics results
+# save metrics results
 metrics_results = {
     "TRAIN_SET": "Train Loss = %.4f - Train Accuracy = %.4f"
     % (train_metrics[0], train_metrics[1]),
@@ -179,7 +179,7 @@ json.dump(
     metrics_results, open(SAVE_DIR + "{}/metrics_results.json".format(DATE_NOW), "w")
 )
 
-# Save config model train
+# save config model train
 config_train = {
     "CCN_MODEL": CCN_MODEL,
     "IMAGE_SIZE": IMAGE_SIZE,
@@ -199,5 +199,5 @@ config_train = {
 
 json.dump(config_train, open(SAVE_DIR + "{}/config_train.json".format(DATE_NOW), "w"))
 
-# Save Tokenizer model
+# save Tokenizer model
 save_tokenizer(tokenizer, NEW_DIR)

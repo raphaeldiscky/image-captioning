@@ -1,12 +1,12 @@
 import tensorflow as tf
-from settings_training import IMAGE_SIZE
-from model import (
+from settings_train import IMAGE_SIZE
+from models import (
     get_cnn_model,
     TransformerEncoderBlock,
     TransformerDecoderBlock,
     ImageCaptioningModel,
 )
-from dataset import read_image_inf
+from datasets import read_image_inf
 import numpy as np
 import json
 
@@ -38,7 +38,7 @@ def get_inference_model(model_config_path):
         cnn_model=cnn_model, encoder=encoder, decoder=decoder
     )
 
-    # It's necessary for init model -> without it, weights subclass model fails
+    # it's necessary for init model -> without it, weights subclass model fails
     cnn_input = tf.keras.layers.Input(shape=(IMAGE_SIZE[0], IMAGE_SIZE[1], 3))
     training = False
     decoder_input = tf.keras.layers.Input(shape=(None,))
@@ -52,20 +52,19 @@ def generate_caption(image_path, caption_model, tokenizer, SEQ_LENGTH):
     index_lookup = dict(zip(range(len(vocab)), vocab))
     max_decoded_sentence_length = SEQ_LENGTH - 1
 
-    # Read the image from the disk
+    # read the image from the disk
     img = read_image_inf(image_path)
 
-    # Pass the image to the CNN
+    # pass the image to the CNN
     img = caption_model.cnn_model(img)
 
-    # Pass the image features to the Transformer encoder
+    # pass the image features to the Transformer encoder
     encoded_img = caption_model.encoder(img, training=False)
 
-    # Generate the caption using the Transformer decoder
+    # generate the caption using the Transformer decoder
     decoded_caption = "<start>"
     for i in range(max_decoded_sentence_length):
         tokenized_caption = tokenizer([decoded_caption])[:, :-1]
-        # tokenized_caption = tokenizer.predict([decoded_caption])[:, :-1]
         mask = tf.math.not_equal(tokenized_caption, 0)
         predictions = caption_model.decoder(
             tokenized_caption, encoded_img, training=False, mask=mask

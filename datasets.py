@@ -1,7 +1,7 @@
 import re
 import numpy as np
 import tensorflow as tf
-from settings_training import (
+from settings_train import (
     BATCH_SIZE,
     IMAGE_SIZE,
     NUM_TRAIN_IMG,
@@ -99,14 +99,14 @@ def read_image(data_aug):
 
     def augment(img):
         img = tf.expand_dims(img, axis=0)
-        img = img_transf(img)
+        img = img_transform(img)
         img = tf.squeeze(img, axis=0)
         return img
 
     return decode_image
 
 
-img_transf = tf.keras.Sequential(
+img_transform = tf.keras.Sequential(
     [
         tf.keras.layers.experimental.preprocessing.RandomContrast(factor=(0.05, 0.15)),
         tf.keras.layers.experimental.preprocessing.RandomTranslation(

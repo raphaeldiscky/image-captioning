@@ -1,4 +1,4 @@
-from utility import get_inference_model, generate_caption
+from utils import get_inference_model, generate_caption
 import json
 import tensorflow as tf
 import os
@@ -21,14 +21,14 @@ SELECTED_RAW_IMAGES_DIR = (
     else None
 )
 
-# Get tokenizer layer from disk
+# get tokenizer layer from disk
 tokenizer = tf.keras.models.load_model(TOKENIZER_PATH)
 tokenizer = tokenizer.layers[1]
 
-# Get model
+# get model
 model = get_inference_model(MODEL_CONFIG_PATH)
 
-# Load model weights
+# load model weights
 model.load_weights(MODEL_WEIGHT_PATH)
 
 list = []
@@ -36,7 +36,7 @@ list = []
 with open(MODEL_CONFIG_PATH) as json_file:
     model_config = json.load(json_file)
 
-# Looping through images in the selected directory
+# looping through images in the selected directory
 for filename in os.listdir(SELECTED_RAW_IMAGES_DIR)[:LIMIT_LENGTH_DATA]:
     dict = {}
     image_id = (
@@ -52,7 +52,7 @@ for filename in os.listdir(SELECTED_RAW_IMAGES_DIR)[:LIMIT_LENGTH_DATA]:
     print("FILENAME: ", filename, "DICT: ", dict)
     list.append(dict)
 
-# Create new directory for saving model
+# create new directory for saving model
 SAVE_DIR = "save_captions/" + DATE_TO_EVALUATE
 os.mkdir(SAVE_DIR)
 
@@ -60,7 +60,7 @@ os.mkdir(SAVE_DIR)
 with open("{}/captions_{}_results_indo.json".format(SAVE_DIR, DATA_TYPE), "w") as fp:
     json.dump(list, fp)
 
-# Save config inference
+# save config inference
 config_inference_all = {
     "MODEL_CONFIG_PATH": MODEL_CONFIG_PATH,
     "MODEL_WEIGHT_PATH": MODEL_WEIGHT_PATH,

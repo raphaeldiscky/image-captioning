@@ -1,8 +1,8 @@
 import tensorflow as tf
-from settings_training import EMBED_DIM, IMAGE_SIZE, SEQ_LENGTH, CCN_MODEL
+from settings_train import EMBED_DIM, IMAGE_SIZE, SEQ_LENGTH, CCN_MODEL
 from tensorflow.keras import layers
 from tensorflow import keras
-from tensorflow.keras.applications import efficientnet, resnet
+from tensorflow.keras.applications import efficientnet, resnet, inception_v3
 
 
 def get_cnn_model():
@@ -10,7 +10,7 @@ def get_cnn_model():
         base_model = efficientnet.EfficientNetB0(
             include_top=False, weights="imagenet", input_shape=(*IMAGE_SIZE, 3)
         )
-        # Freeze feature extractor layers
+        # freeze feature extractor layers
         base_model.trainable = False
         base_model_out = base_model.output
         base_model_out = layers.Reshape((-1, 1280))(base_model_out)
@@ -19,11 +19,12 @@ def get_cnn_model():
         base_model = resnet.ResNet101(
             include_top=False, weights="imagenet", input_shape=(*IMAGE_SIZE, 3)
         )
-        # Freeze feature extractor layers
+        # freeze feature extractor layers
         base_model.trainable = False
         base_model_out = base_model.output
         base_model_out = layers.Reshape((-1, 2048))(base_model_out)
         cnn_model = keras.models.Model(base_model.input, base_model_out)
+
     print("MODEL: ", cnn_model.summary())
     return cnn_model
 
@@ -283,6 +284,6 @@ class ImageCaptioningModel(keras.Model):
 
     @property
     def metrics(self):
-        # We need to list our metrics here so the `reset_states()` can be
+        # we need to list our metrics here so the `reset_states()` can be
         # called automatically.
         return [self.loss_tracker, self.acc_tracker]
