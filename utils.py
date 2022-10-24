@@ -26,8 +26,9 @@ def get_inference_model(model_config_path):
     FF_DIM = model_config["FF_DIM"]
     NUM_HEADS = model_config["NUM_HEADS"]
     VOCAB_SIZE = model_config["VOCAB_SIZE"]
+    CNN_MODEL = model_config["CNN_MODEL"]
 
-    cnn_model = get_cnn_model()
+    cnn_model = get_cnn_model(CNN_MODEL)
     encoder = TransformerEncoderBlock(
         embed_dim=EMBED_DIM, dense_dim=FF_DIM, num_heads=NUM_HEADS
     )

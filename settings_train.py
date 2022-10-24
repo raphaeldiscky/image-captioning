@@ -3,7 +3,7 @@ from datetime import datetime
 DATE_NOW = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
 
 # CNN Model choose between "efficientnet" or "resnet"
-CCN_MODEL = "efficientnet"
+CNN_MODEL = "resnet"
 # desired image dimensions
 IMAGE_SIZE = (256, 256)
 # max vocabulary size

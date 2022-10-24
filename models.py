@@ -1,12 +1,12 @@
 import tensorflow as tf
-from settings_train import EMBED_DIM, IMAGE_SIZE, SEQ_LENGTH, CCN_MODEL
+from settings_train import EMBED_DIM, IMAGE_SIZE, SEQ_LENGTH
 from tensorflow.keras import layers
 from tensorflow import keras
-from tensorflow.keras.applications import efficientnet, resnet, inception_v3
+from tensorflow.keras.applications import efficientnet, resnet
 
 
-def get_cnn_model():
-    if CCN_MODEL == "efficientnet":
+def get_cnn_model(selected_cnn_model):
+    if selected_cnn_model == "efficientnet":
         base_model = efficientnet.EfficientNetB0(
             include_top=False, weights="imagenet", input_shape=(*IMAGE_SIZE, 3)
         )
@@ -15,7 +15,7 @@ def get_cnn_model():
         base_model_out = base_model.output
         base_model_out = layers.Reshape((-1, 1280))(base_model_out)
         cnn_model = keras.models.Model(base_model.input, base_model_out)
-    elif CCN_MODEL == "resnet":
+    elif selected_cnn_model == "resnet":
         base_model = resnet.ResNet101(
             include_top=False, weights="imagenet", input_shape=(*IMAGE_SIZE, 3)
         )

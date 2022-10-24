@@ -1,5 +1,5 @@
 # change this date to the date you want to evaluate
-DATE_TO_EVALUATE = "21_10_2022_01_12_27"  
+DATE_TO_EVALUATE = "23_10_2022_01_31_59"
 
 INFERENCE_ALL_RESULT_PATH = (
     "./save_captions/{}/captions_val2014_results_indo.json".format(DATE_TO_EVALUATE)

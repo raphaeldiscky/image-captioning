@@ -21,6 +21,8 @@ SELECTED_RAW_IMAGES_DIR = (
     else None
 )
 
+print("INFERENCE: {}".format(DATE_TO_EVALUATE))
+
 # get tokenizer layer from disk
 tokenizer = tf.keras.models.load_model(TOKENIZER_PATH)
 tokenizer = tokenizer.layers[1]
@@ -37,6 +39,7 @@ with open(MODEL_CONFIG_PATH) as json_file:
     model_config = json.load(json_file)
 
 # looping through images in the selected directory
+iteration = 1
 for filename in os.listdir(SELECTED_RAW_IMAGES_DIR)[:LIMIT_LENGTH_DATA]:
     dict = {}
     image_id = (
@@ -49,7 +52,8 @@ for filename in os.listdir(SELECTED_RAW_IMAGES_DIR)[:LIMIT_LENGTH_DATA]:
     dict["caption"] = generate_caption(
         image_path, model, tokenizer, model_config["SEQ_LENGTH"]
     )
-    print("FILENAME: ", filename, "DICT: ", dict)
+    print("Iteration: {}, FILENAME: ".format(iteration), filename, "DICT: ", dict)
+    iteration += 1
     list.append(dict)
 
 # create new directory for saving model

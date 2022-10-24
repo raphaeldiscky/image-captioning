@@ -1,13 +1,18 @@
 from matplotlib import pyplot as plt
 from settings_inference import DATE_TO_EVALUATE
-import numpy as np
 import json
+import os
 
 with open("./save_train_dir/{}/history.json".format(DATE_TO_EVALUATE)) as json_file:
     history_dict = json.load(json_file)
 
 
-def plot_training():
+def plot_accuracy():
+    # create new directory for saving plot
+    SAVE_DIR = "save_plot/" + DATE_TO_EVALUATE
+    if not os.path.exists(SAVE_DIR):
+        os.makedirs(SAVE_DIR)
+
     # plot training & validation accuracy values
     plt.plot(
         range(1, len(history_dict["acc"]) + 1),
@@ -24,7 +29,15 @@ def plot_training():
     plt.ylabel("accuracy")
     plt.legend()
     plt.xticks(range(1, len(history_dict["acc"]) + 1))
-    plt.show()
+    plt.savefig("./save_plot/{}/model_accuracy.png".format(DATE_TO_EVALUATE))
+
+
+def plot_loss():
+    plt.figure()
+    # create new directory for saving plot
+    SAVE_DIR = "save_plot/" + DATE_TO_EVALUATE
+    if not os.path.exists(SAVE_DIR):
+        os.makedirs(SAVE_DIR)
 
     # plot training & validation loss values
     plt.plot(
@@ -42,7 +55,8 @@ def plot_training():
     plt.ylabel("loss")
     plt.legend()
     plt.xticks(range(1, len(history_dict["loss"]) + 1))
-    plt.show()
+    plt.savefig("./save_plot/{}/model_loss.png".format(DATE_TO_EVALUATE))
 
 
-plot_training()
+plot_accuracy()
+plot_loss()

@@ -4,7 +4,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 
 from settings_train import (
     BATCH_SIZE,
-    CCN_MODEL,
+    CNN_MODEL,
     DATE_NOW,
     EMBED_DIM,
     EPOCHS,
@@ -101,7 +101,7 @@ test_dataset = make_dataset(
 )
 
 # get Model
-cnn_model = get_cnn_model()
+cnn_model = get_cnn_model(CNN_MODEL)
 
 encoder = TransformerEncoderBlock(
     embed_dim=EMBED_DIM, dense_dim=FF_DIM, num_heads=NUM_HEADS
@@ -181,7 +181,7 @@ json.dump(
 
 # save config model train
 config_train = {
-    "CCN_MODEL": CCN_MODEL,
+    "CNN_MODEL": CNN_MODEL,
     "IMAGE_SIZE": IMAGE_SIZE,
     "MAX_VOCAB_SIZE": MAX_VOCAB_SIZE,
     "SEQ_LENGTH": SEQ_LENGTH,
@@ -199,5 +199,5 @@ config_train = {
 
 json.dump(config_train, open(SAVE_DIR + "{}/config_train.json".format(DATE_NOW), "w"))
 
-# save Tokenizer model
+# save tokenizer model
 save_tokenizer(tokenizer, NEW_DIR)
