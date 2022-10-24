@@ -1,8 +1,16 @@
-from settings_inference import MODEL_CONFIG_PATH, MODEL_WEIGHT_PATH, TOKENIZER_PATH
+from settings_inference import (
+    MODEL_CONFIG_PATH,
+    MODEL_WEIGHT_PATH,
+    TOKENIZER_PATH,
+    DATE_TO_EVALUATE,
+)
 from utils import get_inference_model, generate_caption
 import json
 import tensorflow as tf
 import argparse
+
+
+print("\n\nINFERENCE: {}\n\n".format(DATE_TO_EVALUATE))
 
 # get tokenizer layer from disk
 tokenizer = tf.keras.models.load_model(TOKENIZER_PATH)
@@ -17,7 +25,7 @@ model.load_weights(MODEL_WEIGHT_PATH)
 # generate new caption from input image
 parser = argparse.ArgumentParser(description="Image Captioning")
 parser.add_argument("--path", help="Path to image file.")
-image_path = parser.parse_args().image
+image_path = parser.parse_args().path
 
 with open(MODEL_CONFIG_PATH) as json_file:
     model_config = json.load(json_file)

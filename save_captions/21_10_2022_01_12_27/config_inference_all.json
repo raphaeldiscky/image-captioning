@@ -1,0 +1,1 @@
+{"MODEL_CONFIG_PATH": "save_train_dir/21_10_2022_01_12_27/config_train.json", "MODEL_WEIGHT_PATH": "save_train_dir/21_10_2022_01_12_27/model_weights_coco.h5", "DATA_TYPE": "val2014", "LIMIT_LENGTH_DATA": 5000}

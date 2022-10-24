@@ -21,7 +21,7 @@ SELECTED_RAW_IMAGES_DIR = (
     else None
 )
 
-print("INFERENCE: {}".format(DATE_TO_EVALUATE))
+print("\n\nINFERENCE ALL: {}\n\n".format(DATE_TO_EVALUATE))
 
 # get tokenizer layer from disk
 tokenizer = tf.keras.models.load_model(TOKENIZER_PATH)

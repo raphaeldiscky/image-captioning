@@ -1,6 +1,5 @@
 __pycache__/
-save_train_dir/*
-save_captions/*
+save_trains/*
 datasets/captions
 datasets/test2014
 datasets/train2014

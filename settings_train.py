@@ -45,4 +45,4 @@ valid_data_json_path = "datasets/karpathy_val2014_indo.json"
 text_data_json_path = "datasets/text_data_indo.json"
 
 # save training files directory
-SAVE_DIR = "save_train_dir/"
+SAVE_DIR = "save_trains/"

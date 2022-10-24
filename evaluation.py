@@ -9,9 +9,10 @@ import json
 import os
 import shutil
 
-results = []
 
-print("EVALUATE: {}".format(INFERENCE_ALL_RESULT_PATH))
+print("\n\nEVALUATE: {}\n\n".format(DATE_TO_EVALUATE))
+
+results = []
 
 # create coco object and coco_result object
 coco = COCO(VAL_RAW_PATH)
@@ -41,11 +42,11 @@ if not os.path.exists(SAVE_DIR):
 json.dump(results, open(SAVE_DIR + "/evaluation_results.json", "w"))
 
 # copy training config and result to save_evaluations
-original = "save_train_dir/" + DATE_TO_EVALUATE + "/config_train.json"
+original = "save_trains/" + DATE_TO_EVALUATE + "/config_train.json"
 target = SAVE_DIR + "/training_config.json"
 shutil.copyfile(original, target)
 
 # copy training history to save_evaluations
-original = "save_train_dir/" + DATE_TO_EVALUATE + "/history.json"
+original = "save_trains/" + DATE_TO_EVALUATE + "/history.json"
 target = SAVE_DIR + "/history.json"
 shutil.copyfile(original, target)
