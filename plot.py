@@ -25,12 +25,12 @@ def plot_accuracy():
     plt.plot(
         range(1, len(history_dict["acc"]) + 1),
         history_dict["acc"],
-        label="training accuracy",
+        label="train acc",
     )
     plt.plot(
         range(1, len(history_dict["val_acc"]) + 1),
         history_dict["val_acc"],
-        label="validation accuracy",
+        label="val acc",
     )
     plt.title(
         "cnn_model: {}, num_heads: {}, embed_dim: {}, ff_dim: {}".format(
@@ -57,7 +57,7 @@ def plot_loss():
     plt.plot(
         range(1, len(history_dict["loss"]) + 1),
         history_dict["loss"],
-        label="training loss",
+        label="train loss",
     )
     plt.plot(
         range(1, len(history_dict["val_loss"]) + 1),
