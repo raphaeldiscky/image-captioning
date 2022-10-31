@@ -11,8 +11,6 @@ with open(MODEL_CONFIG_PATH) as json_file:
 
 CNN_MODEL = model_config["CNN_MODEL"]
 NUM_HEADS = model_config["NUM_HEADS"]
-EMBED_DIM = model_config["EMBED_DIM"]
-FF_DIM = model_config["FF_DIM"]
 
 
 def plot_accuracy():
@@ -33,9 +31,7 @@ def plot_accuracy():
         label="val acc",
     )
     plt.title(
-        "cnn_model: {}, num_heads: {}, embed_dim: {}, ff_dim: {}".format(
-            CNN_MODEL, NUM_HEADS, EMBED_DIM, FF_DIM
-        ),
+        "cnn_model: {}, num_heads: {}".format(CNN_MODEL, NUM_HEADS),
         fontsize="medium",
     )
     plt.suptitle("Model Accuracy", fontsize="large")
@@ -65,9 +61,7 @@ def plot_loss():
         label="val loss",
     )
     plt.title(
-        "cnn_model: {}, num_heads: {}, embed_dim: {}, ff_dim: {}".format(
-            CNN_MODEL, NUM_HEADS, EMBED_DIM, FF_DIM
-        ),
+        "cnn_model: {}, num_heads: {}".format(CNN_MODEL, NUM_HEADS),
         fontsize="medium",
     )
     plt.suptitle("Model Loss", fontsize="large")

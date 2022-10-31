@@ -13,7 +13,7 @@ SEQ_LENGTH = 25
 # dimension for the image embeddings and token embeddings
 EMBED_DIM = 512
 # number of self-attention heads
-NUM_HEADS = 6
+NUM_HEADS = 8
 # per-layer units in the feed-forward network
 FF_DIM = 2048
 # shuffle dataset dim on tf.data.Dataset

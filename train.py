@@ -118,7 +118,7 @@ cross_entropy = keras.losses.SparseCategoricalCrossentropy(
     from_logits=True, reduction="none"
 )
 
-# earlyStopping
+# early stopping
 early_stopping = keras.callbacks.EarlyStopping(
     monitor="val_loss", patience=4, restore_best_weights=True
 )
