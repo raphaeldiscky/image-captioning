@@ -125,7 +125,7 @@ test_dataset = make_dataset(
 # get model
 cnn_model = get_cnn_model(CNN_MODEL)
 
-encoder = Encoder(embed_dim=EMBED_DIM, num_heads=NUM_HEADS)
+encoder = Encoder(embed_dim=EMBED_DIM, num_heads=NUM_HEADS, ff_dim=FF_DIM)
 
 decoder = Decoder(
     embed_dim=EMBED_DIM,

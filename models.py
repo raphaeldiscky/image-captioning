@@ -86,7 +86,7 @@ class PositionalEmbedding(layers.Layer):
 
 
 class Encoder(layers.Layer):
-    def __init__(self, embed_dim, num_heads, **kwargs):
+    def __init__(self, embed_dim, ff_dim, num_heads, **kwargs):
         super().__init__(**kwargs)
         self.embed_dim = embed_dim
         self.num_heads = num_heads
@@ -95,14 +95,18 @@ class Encoder(layers.Layer):
         )
         self.dense_proj = layers.Dense(embed_dim, activation="relu")
         self.add_norm1 = layers.LayerNormalization()
+        self.feed_forward = FeedForward(embed_dim, ff_dim)
+        self.add_norm2 = layers.LayerNormalization()
 
     def call(self, inputs, training, mask=None):
         inputs = self.dense_proj(inputs)
         multihead_attention_output = self.multihead_attention(
             query=inputs, value=inputs, key=inputs, attention_mask=None
         )
-        proj_input = self.add_norm1(inputs + multihead_attention_output)
-        return proj_input
+        addnorm_output_1 = self.add_norm1(inputs + multihead_attention_output)
+        feed_forward_output = self.feed_forward(addnorm_output_1)
+        enc_output = self.add_norm2(addnorm_output_1 + feed_forward_output)
+        return enc_output
 
 
 class Decoder(layers.Layer):
