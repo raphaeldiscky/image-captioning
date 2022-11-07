@@ -1,5 +1,5 @@
 import tensorflow as tf
-from settings_train import EMBED_DIM, IMAGE_SIZE, SEQ_LENGTH, NUM_LAYERS
+from settings_train import EMBED_DIM, IMAGE_SIZE, SEQ_LENGTH
 from tensorflow.keras import layers
 from tensorflow import keras
 from tensorflow.keras.applications import efficientnet, resnet
@@ -91,35 +91,9 @@ class PositionalEmbedding(layers.Layer):
         return embedded_words + embedded_indices
 
 
-# Encoder Layer
-# class EncoderLayer(layers.Layer):
-#     def __init__(self, embed_dim, ff_dim, num_heads, dropout_rate=0.1, **kwargs):
-#         super(EncoderLayer, self).__init__(**kwargs)
-#         self.multihead_attention = layers.MultiHeadAttention(
-#             num_heads=num_heads, key_dim=embed_dim
-#         )
-#         self.add_norm_1 = AddNormalization()
-#         self.dropout_1 = layers.Dropout(dropout_rate)
-#         self.feed_forward = FeedForward(embed_dim, ff_dim)
-#         self.add_norm_2 = AddNormalization()
-#         self.dropout_2 = layers.Dropout(dropout_rate)
-
-#     def call(self, inputs, training):
-#         multihead_ouput = self.multihead_attention(
-#             query=inputs, value=inputs, key=inputs
-#         )
-#         multihead_ouput = self.dropout_1(multihead_ouput, training=training)
-#         out1 = self.add_norm_1(inputs + multihead_ouput)
-#         feed_forward_output = self.feed_forward(out1)
-#         feed_forward_output = self.dropout_2(feed_forward_output, training=training)
-#         return self.add_norm_2(out1 + feed_forward_output)
-
-
 # Encoder
 class Encoder(layers.Layer):
-    def __init__(
-        self, num_layers, embed_dim, num_heads, ff_dim, dropout_rate=0.1, **kwargs
-    ):
+    def __init__(self, embed_dim, num_heads, **kwargs):
         super(Encoder, self).__init__(**kwargs)
         self.multihead_attention = layers.MultiHeadAttention(
             num_heads=num_heads, key_dim=embed_dim
@@ -140,54 +114,14 @@ class Encoder(layers.Layer):
         return enc_output
 
 
-# Decoder Layer
-# class DecoderLayer(layers.Layer):
-# def __init__(self, embed_dim, num_heads, ff_dim, dropout_rate=0.1, **kwargs):
-#     super(DecoderLayer, self).__init__(**kwargs)
-#     self.multihead_attention_1 = layers.MultiHeadAttention(
-#         num_heads=num_heads, key_dim=embed_dim
-#     )
-#     self.multihead_attention_2 = layers.MultiHeadAttention(
-#         num_heads=num_heads, key_dim=embed_dim
-#     )
-#     self.feed_forward = FeedForward(embed_dim, ff_dim)
-#     self.add_norm1 = AddNormalization()
-#     self.add_norm2 = AddNormalization()
-#     self.add_norm3 = AddNormalization()
-#     self.dropout_1 = layers.Dropout(dropout_rate)
-#     self.dropout_2 = layers.Dropout(dropout_rate)
-#     self.dropout_3 = layers.Dropout(dropout_rate)
-
-# def call(self, x, enc_output, training):
-#     multihead_output_1 = self.multihead_attention_1(x, x)
-#     multihead_output_1 = self.dropout_1(multihead_output_1, training=training)
-#     out1 = self.add_norm1(multihead_output_1 + x)
-#     multihead_output_2 = self.multihead_attention_2(
-#         out1, enc_output, value=enc_output
-#     )
-#     multihead_output_2 = self.dropout_2(multihead_output_2, training=training)
-#     out2 = self.add_norm2(multihead_output_2 + out1)
-#     ffn_output = self.feed_forward(out2)
-#     ffn_output = self.dropout_3(ffn_output, training=training)
-#     return self.add_norm3(ffn_output + out2)
-
-
 # Decoder
 class Decoder(layers.Layer):
     def __init__(
-        self,
-        num_layers,
-        embed_dim,
-        num_heads,
-        ff_dim,
-        vocab_size,
-        dropout_rate=0.1,
-        **kwargs
+        self, embed_dim, num_heads, ff_dim, vocab_size, dropout_rate=0.1, **kwargs
     ):
         super(Decoder, self).__init__(**kwargs)
         self.embed_dim = embed_dim
         self.ff_dim = ff_dim
-        self.num_layers = num_layers
         self.num_heads = num_heads
         self.vocab_size = vocab_size
         self.pos_encoding = PositionalEmbedding(
@@ -207,7 +141,7 @@ class Decoder(layers.Layer):
         self.dropout_2 = layers.Dropout(0.5)
         self.output_layer = layers.Dense(vocab_size)
 
-    def call(self, x, enc_output, training):
+    def call(self, x, enc_output, training, mask=None):
         x = self.pos_encoding(x)
         x = self.dropout_1(x, training=training)
 
@@ -246,7 +180,7 @@ class ImageCaptioningModel(keras.Model):
     def call(self, inputs):
         features = self.cnn_model(inputs[0])
         enc_output = self.encoder(features, False)
-        dec_output = self.decoder(inputs[2], enc_output, training=inputs[1])
+        dec_output = self.decoder(inputs[2], enc_output, training=inputs[1], mask=None)
         return dec_output
 
     def calculate_loss(self, y_true, y_pred, mask):

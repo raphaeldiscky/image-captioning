@@ -24,7 +24,6 @@ from settings_train import (
     SEQ_LENGTH,
     TRAIN_SET_AUG,
     EARLY_STOPPING,
-    NUM_LAYERS,
 )
 from datasets import (
     make_dataset,
@@ -126,12 +125,9 @@ test_dataset = make_dataset(
 # get model
 cnn_model = get_cnn_model(CNN_MODEL)
 
-encoder = Encoder(
-    num_layers=NUM_LAYERS, embed_dim=EMBED_DIM, num_heads=NUM_HEADS, ff_dim=FF_DIM
-)
+encoder = Encoder(embed_dim=EMBED_DIM, num_heads=NUM_HEADS)
 
 decoder = Decoder(
-    num_layers=NUM_LAYERS,
     embed_dim=EMBED_DIM,
     num_heads=NUM_HEADS,
     ff_dim=FF_DIM,

@@ -1,5 +1,5 @@
 import tensorflow as tf
-from settings_train import IMAGE_SIZE, NUM_LAYERS
+from settings_train import IMAGE_SIZE
 from models import (
     get_cnn_model,
     Decoder,
@@ -29,12 +29,9 @@ def get_inference_model(model_config_path):
     CNN_MODEL = model_config["CNN_MODEL"]
 
     cnn_model = get_cnn_model(CNN_MODEL)
-    encoder = Encoder(
-        num_layers=NUM_LAYERS, embed_dim=EMBED_DIM, num_heads=NUM_HEADS, ff_dim=FF_DIM
-    )
+    encoder = Encoder(embed_dim=EMBED_DIM, num_heads=NUM_HEADS)
 
     decoder = Decoder(
-        num_layers=NUM_LAYERS,
         embed_dim=EMBED_DIM,
         num_heads=NUM_HEADS,
         ff_dim=FF_DIM,

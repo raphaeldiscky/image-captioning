@@ -24,17 +24,15 @@ SHUFFLE_DIM = 512
 BATCH_SIZE = 64
 # numbers of training epochs
 EPOCHS = 5
-# num layers
-NUM_LAYERS = 2
 
 
 # Using karpathy's
 # train = 113287
 # val = 5000
 # test = 5000 (remainder)
-REDUCE_DATASET = True
+REDUCE_DATASET = False
 # number of train images -> it must be a value between [1, 113287]
-NUM_TRAIN_IMG = 10000
+NUM_TRAIN_IMG = 113287
 # number of valid images -> it must be a value between [1, 10000]
 # if NUM_VALID_IMG = 5000, then NUM_TEST_IMG = 5000 is the remainder
 NUM_VALID_IMG = 5000
