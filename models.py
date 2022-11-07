@@ -24,8 +24,6 @@ def get_cnn_model(selected_cnn_model):
         base_model_out = base_model.output
         base_model_out = layers.Reshape((-1, 2048))(base_model_out)
         cnn_model = keras.models.Model(base_model.input, base_model_out)
-
-    print("MODEL: ", cnn_model.summary())
     return cnn_model
 
 

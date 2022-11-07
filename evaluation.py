@@ -22,7 +22,7 @@ coco_result = coco.loadRes(INFERENCE_ALL_RESULT_PATH)
 coco_eval = COCOEvalCap(coco, coco_result)
 
 # evaluate on a subset of images by setting
-# coco_eval.params['image_id'] = coco_result.getImgIds()
+# coco_eval.params["image_id"] = coco_result.getImgIds()
 # please remove this line when evaluating the full validation set
 coco_eval.params["image_id"] = coco_result.getImgIds()
 
@@ -31,7 +31,6 @@ coco_eval.evaluate()
 
 # print output evaluation scores
 for metric, score in coco_eval.eval.items():
-    print(f"{metric}: {score:.3f}")
     results.append(f"{metric}: {score:.3f}")
 
 SAVE_DIR = "save_evaluations/" + DATE_TO_EVALUATE
@@ -39,14 +38,26 @@ SAVE_DIR = "save_evaluations/" + DATE_TO_EVALUATE
 if not os.path.exists(SAVE_DIR):
     os.makedirs(SAVE_DIR)
 
-json.dump(results, open(SAVE_DIR + "/evaluation_results.json", "w"))
-
 # copy training config and result to save_evaluations
-original = "save_trains/" + DATE_TO_EVALUATE + "/config_train.json"
+config_train_path = "save_trains/" + DATE_TO_EVALUATE + "/config_train.json"
+with open(config_train_path) as json_file:
+    config_train = json.load(json_file)
 target = SAVE_DIR + "/training_config.json"
-shutil.copyfile(original, target)
+shutil.copyfile(config_train_path, target)
 
 # copy training history to save_evaluations
-original = "save_trains/" + DATE_TO_EVALUATE + "/history.json"
+history_path = "save_trains/" + DATE_TO_EVALUATE + "/history.json"
+with open(history_path) as json_file:
+    history = json.load(json_file)
 target = SAVE_DIR + "/history.json"
-shutil.copyfile(original, target)
+shutil.copyfile(history_path, target)
+
+results.append(
+    {
+        "EPOCH": len(history["acc"]),
+        "CNN_MODEL": config_train["CNN_MODEL"],
+        "NUM_HEADS": config_train["NUM_HEADS"],
+    }
+)
+
+json.dump(results, open(SAVE_DIR + "/evaluation_results.json", "w"))

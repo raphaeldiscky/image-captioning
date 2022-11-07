@@ -23,6 +23,7 @@ from settings_train import (
     MAX_VOCAB_SIZE,
     SEQ_LENGTH,
     TRAIN_SET_AUG,
+    EARLY_STOPPING,
 )
 from datasets import (
     make_dataset,
@@ -57,7 +58,7 @@ if REDUCE_DATASET:
 print("Number of training samples: ", len(train_data))
 print("Number of validation samples: ", len(valid_data))
 
-# define tokenizer of Text Dataset
+# define tokeziner / vectorize layer
 tokenizer = TextVectorization(
     max_tokens=MAX_VOCAB_SIZE,
     output_mode="int",
@@ -65,11 +66,12 @@ tokenizer = TextVectorization(
     standardize=custom_standardization,
 )
 
-# adapt tokenizer to Text Dataset
+# adapt tokenizer to create the vocabulary
 tokenizer.adapt(text_data)
 
-# define vocabulary size of Dataset
+# define vocabulary size of the vocabulary
 VOCAB_SIZE = len(tokenizer.get_vocabulary())
+
 print("Vocab size: ", VOCAB_SIZE)
 
 # Split dataset to valid and test set
@@ -78,7 +80,27 @@ valid_data, test_data = valid_test_split(valid_data)
 print("Validation data after splitting with test set: ", len(valid_data))
 print("Test data: ", len(test_data))
 
-# Setting batch dataset
+config_train = {
+    "CNN_MODEL": CNN_MODEL,
+    "EARLY_STOPPING": EARLY_STOPPING,
+    "IMAGE_SIZE": IMAGE_SIZE,
+    "MAX_VOCAB_SIZE": MAX_VOCAB_SIZE,
+    "SEQ_LENGTH": SEQ_LENGTH,
+    "EMBED_DIM": EMBED_DIM,
+    "NUM_HEADS": NUM_HEADS,
+    "FF_DIM": FF_DIM,
+    "SHUFFLE_DIM": SHUFFLE_DIM,
+    "BATCH_SIZE": BATCH_SIZE,
+    "EPOCHS": EPOCHS,
+    "VOCAB_SIZE": VOCAB_SIZE,
+    "NUM_TRAIN_IMG": NUM_TRAIN_IMG,
+    "NUM_VALID_IMG": NUM_VALID_IMG,
+    "NUM_TEST_IMG": len(test_data),
+}
+
+print(config_train)
+
+# setting batch dataset
 train_dataset = make_dataset(
     list(train_data.keys()),
     list(train_data.values()),
@@ -100,7 +122,7 @@ test_dataset = make_dataset(
     tokenizer=tokenizer,
 )
 
-# get Model
+# get model
 cnn_model = get_cnn_model(CNN_MODEL)
 
 encoder = TransformerEncoderBlock(
@@ -137,21 +159,14 @@ history = caption_model.fit(
     train_dataset,
     epochs=EPOCHS,
     validation_data=valid_dataset,
-    callbacks=[early_stopping],
+    callbacks=[early_stopping] if EARLY_STOPPING else None,
 )
+
 
 # compute definitive metrics on train/valid/test set
 train_metrics = caption_model.evaluate(train_dataset, batch_size=BATCH_SIZE)
 valid_metrics = caption_model.evaluate(valid_dataset, batch_size=BATCH_SIZE)
 test_metrics = caption_model.evaluate(test_dataset, batch_size=BATCH_SIZE)
-
-print(
-    "Train Loss = %.4f - Train Accuracy = %.4f" % (train_metrics[0], train_metrics[1])
-)
-print(
-    "Valid Loss = %.4f - Valid Accuracy = %.4f" % (valid_metrics[0], valid_metrics[1])
-)
-print("Test Loss = %.4f - Test Accuracy = %.4f" % (test_metrics[0], test_metrics[1]))
 
 # create new directory for saving model
 NEW_DIR = SAVE_DIR + DATE_NOW
@@ -174,29 +189,13 @@ metrics_results = {
     "TEST_SET": "Test Loss = %.4f - Test Accuracy = %.4f"
     % (test_metrics[0], test_metrics[1]),
 }
+print(metrics_results)
 
 json.dump(
     metrics_results, open(SAVE_DIR + "{}/metrics_results.json".format(DATE_NOW), "w")
 )
 
 # save config model train
-config_train = {
-    "CNN_MODEL": CNN_MODEL,
-    "IMAGE_SIZE": IMAGE_SIZE,
-    "MAX_VOCAB_SIZE": MAX_VOCAB_SIZE,
-    "SEQ_LENGTH": SEQ_LENGTH,
-    "EMBED_DIM": EMBED_DIM,
-    "NUM_HEADS": NUM_HEADS,
-    "FF_DIM": FF_DIM,
-    "SHUFFLE_DIM": SHUFFLE_DIM,
-    "BATCH_SIZE": BATCH_SIZE,
-    "EPOCHS": EPOCHS,
-    "VOCAB_SIZE": VOCAB_SIZE,
-    "NUM_TRAIN_IMG": NUM_TRAIN_IMG,
-    "NUM_VALID_IMG": NUM_VALID_IMG,
-    "NUM_TEST_IMG": len(test_data),
-}
-
 json.dump(config_train, open(SAVE_DIR + "{}/config_train.json".format(DATE_NOW), "w"))
 
 # save tokenizer model

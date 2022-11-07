@@ -9,25 +9,25 @@ from settings_train import (
     SHUFFLE_DIM,
 )
 
-strip_chars = "!\"#$%&'()*+,-./:;=?@[\]^_`{|}~"
 AUTOTUNE = tf.data.AUTOTUNE
 
 
 @tf.keras.utils.register_keras_serializable()
 def custom_standardization(input_string):
+    remove_chars = "!\"#$%&'()*+,-./:;=?@[\]^_`{|}~"
     lowercase = tf.strings.lower(input_string)
-    return tf.strings.regex_replace(lowercase, "[%s]" % re.escape(strip_chars), "")
+    return tf.strings.regex_replace(lowercase, "[%s]" % re.escape(remove_chars), "")
 
 
 def train_val_split(caption_data, train_size=0.8, shuffle=True):
-    # Get the list of all image names
+    # get the list of all image names
     all_images = list(caption_data.keys())
 
-    # Shuffle if necessary
+    # shuffle if necessary
     if shuffle:
         np.random.shuffle(all_images)
 
-    # Split into training and validation sets
+    # split into training and validation sets
     train_size = int(len(caption_data) * train_size)
 
     training_data = {
@@ -37,44 +37,22 @@ def train_val_split(caption_data, train_size=0.8, shuffle=True):
         img_name: caption_data[img_name] for img_name in all_images[train_size:]
     }
 
-    # Return the splits
+    # return the splits
     return training_data, validation_data
 
 
 def valid_test_split(captions_mapping_valid):
     valid_data = {}
     test_data = {}
-    conta_valid = 0
+    count_valid = 0
     for id in captions_mapping_valid:
-        if conta_valid < NUM_VALID_IMG:
+        if count_valid < NUM_VALID_IMG:
             valid_data.update({id: captions_mapping_valid[id]})
-            conta_valid += 1
+            count_valid += 1
         else:
             test_data.update({id: captions_mapping_valid[id]})
-            conta_valid += 1
+            count_valid += 1
     return valid_data, test_data
-
-
-def reduce_dataset_dim(captions_mapping_train, captions_mapping_valid):
-    train_data = {}
-    conta_train = 0
-    for id in captions_mapping_train:
-        if conta_train <= NUM_TRAIN_IMG:
-            train_data.update({id: captions_mapping_train[id]})
-            conta_train += 1
-        else:
-            break
-
-    valid_data = {}
-    conta_valid = 0
-    for id in captions_mapping_valid:
-        if conta_valid <= NUM_VALID_IMG:
-            valid_data.update({id: captions_mapping_valid[id]})
-            conta_valid += 1
-        else:
-            break
-
-    return train_data, valid_data
 
 
 def read_image_inf(img_path):
@@ -133,3 +111,25 @@ def make_dataset(images, captions, data_aug, tokenizer):
     dataset = tf.data.Dataset.zip((img_dataset, cap_dataset))
     dataset = dataset.batch(BATCH_SIZE).shuffle(SHUFFLE_DIM).prefetch(AUTOTUNE)
     return dataset
+
+
+def reduce_dataset_dim(captions_mapping_train, captions_mapping_valid):
+    train_data = {}
+    count_train = 0
+    for id in captions_mapping_train:
+        if count_train <= NUM_TRAIN_IMG:
+            train_data.update({id: captions_mapping_train[id]})
+            count_train += 1
+        else:
+            break
+
+    valid_data = {}
+    count_valid = 0
+    for id in captions_mapping_valid:
+        if count_valid <= NUM_VALID_IMG:
+            valid_data.update({id: captions_mapping_valid[id]})
+            count_valid += 1
+        else:
+            break
+
+    return train_data, valid_data

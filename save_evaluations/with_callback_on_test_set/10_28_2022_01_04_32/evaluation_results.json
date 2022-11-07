@@ -1,0 +1,14 @@
+[
+    "Bleu_1: 0.643",
+    "Bleu_2: 0.470",
+    "Bleu_3: 0.327",
+    "Bleu_4: 0.224",
+    "METEOR: 0.230",
+    "ROUGE_L: 0.486",
+    "CIDEr: 0.864",
+    {
+        "EPOCH": 12,
+        "CNN_MODEL": "resnet",
+        "NUM_HEADS": 6
+    }
+]

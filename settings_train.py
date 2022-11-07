@@ -1,9 +1,11 @@
 from datetime import datetime
 
-DATE_NOW = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
+DATE_NOW = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
 
-# CNN Model choose between "efficientnet" or "resnet"
-CNN_MODEL = "resnet"
+# CNN model choose between "efficientnet" or "resnet"
+CNN_MODEL = "efficientnet"
+# early stopping
+EARLY_STOPPING = True
 # desired image dimensions
 IMAGE_SIZE = (256, 256)
 # max vocabulary size
@@ -13,7 +15,7 @@ SEQ_LENGTH = 25
 # dimension for the image embeddings and token embeddings
 EMBED_DIM = 512
 # number of self-attention heads
-NUM_HEADS = 8
+NUM_HEADS = 2
 # per-layer units in the feed-forward network
 FF_DIM = 2048
 # shuffle dataset dim on tf.data.Dataset
@@ -40,9 +42,9 @@ TRAIN_SET_AUG = True
 VALID_SET_AUG = False
 
 # for Indonesian dataset
-train_data_json_path = "datasets/karpathy_train2014_indo.json"
-valid_data_json_path = "datasets/karpathy_val2014_indo.json"
+train_data_json_path = "datasets/karpathy_train2014_indo.json"  # 113287 data
+valid_data_json_path = "datasets/karpathy_valtest2014_indo.json"  # 10000 data
 text_data_json_path = "datasets/text_data_indo.json"
 
 # save training files directory
-SAVE_DIR = "save_trains/"
+SAVE_DIR = "save_trains/".format(DATE_NOW)
