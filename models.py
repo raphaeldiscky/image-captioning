@@ -1,10 +1,12 @@
 import tensorflow as tf
-from settings_train import EMBED_DIM, IMAGE_SIZE, SEQ_LENGTH
+from settings_train import EMBED_DIM, IMAGE_SIZE, SEQ_LENGTH, NUM_LAYERS
 from tensorflow.keras import layers
 from tensorflow import keras
 from tensorflow.keras.applications import efficientnet, resnet
+import numpy as np
 
 
+# Get CNN model
 def get_cnn_model(selected_cnn_model):
     if selected_cnn_model == "efficientnet":
         base_model = efficientnet.EfficientNetB0(
@@ -27,135 +29,213 @@ def get_cnn_model(selected_cnn_model):
     return cnn_model
 
 
-class TransformerEncoderBlock(layers.Layer):
-    def __init__(self, embed_dim, dense_dim, num_heads, **kwargs):
-        super().__init__(**kwargs)
-        self.embed_dim = embed_dim
-        self.dense_dim = dense_dim
-        self.num_heads = num_heads
-        self.attention = layers.MultiHeadAttention(
-            num_heads=num_heads, key_dim=embed_dim
-        )
-        self.dense_proj = layers.Dense(embed_dim, activation="relu")
-        self.layernorm_1 = layers.LayerNormalization()
+# Add & Norm Layer
+class AddNormalization(layers.Layer):
+    def __init__(self, **kwargs):
+        super(AddNormalization, self).__init__(**kwargs)
+        self.layer_norm = layers.LayerNormalization()
 
-    def call(self, inputs, training, mask=None):
-        inputs = self.dense_proj(inputs)
-        attention_output = self.attention(
-            query=inputs, value=inputs, key=inputs, attention_mask=None
-        )
-        proj_input = self.layernorm_1(inputs + attention_output)
-        return proj_input
+    def call(self, x):
+        return self.layer_norm(x)
 
 
+# Feed Forward Layer
+class FeedForward(layers.Layer):
+    def __init__(self, embed_dim, ff_dim, **kwargs):
+        super(FeedForward, self).__init__(**kwargs)
+        self.dense_1 = layers.Dense(units=ff_dim)
+        self.dense_2 = layers.Dense(units=embed_dim)
+        self.relu = layers.ReLU()
+
+    def call(self, x):
+        return self.dense_2(self.relu(self.dense_1(x)))
+
+
+# Positional Embedding
 class PositionalEmbedding(layers.Layer):
     def __init__(self, sequence_length, vocab_size, embed_dim, **kwargs):
-        super().__init__(**kwargs)
+        super(PositionalEmbedding, self).__init__(**kwargs)
         self.token_embeddings = layers.Embedding(
             input_dim=vocab_size, output_dim=embed_dim
         )
-        self.position_embeddings = layers.Embedding(
-            input_dim=sequence_length, output_dim=embed_dim
+        word_embedding_matrix = self.get_position_encoding(vocab_size, embed_dim)
+        position_embedding_matrix = self.get_position_encoding(
+            sequence_length, embed_dim
         )
-        self.sequence_length = sequence_length
-        self.vocab_size = vocab_size
-        self.embed_dim = embed_dim
+        self.word_embedding_layer = layers.Embedding(
+            input_dim=vocab_size,
+            output_dim=embed_dim,
+            weights=[word_embedding_matrix],
+            trainable=False,
+        )
+        self.position_embedding_layer = layers.Embedding(
+            input_dim=sequence_length,
+            output_dim=embed_dim,
+            weights=[position_embedding_matrix],
+            trainable=False,
+        )
 
-    def call(self, inputs):
-        length = tf.shape(inputs)[-1]
-        positions = tf.range(start=0, limit=length, delta=1)
-        embedded_tokens = self.token_embeddings(inputs)
-        embedded_positions = self.position_embeddings(positions)
-        return embedded_tokens + embedded_positions
+    def get_position_encoding(self, seq_len, d, n=10000):
+        P = np.zeros((seq_len, d))
+        for pos in range(seq_len):
+            for i in np.arange(int(d / 2)):
+                denominator = np.power(n, 2 * i / d)
+                P[pos, 2 * i] = np.sin(pos / denominator)
+                P[pos, 2 * i + 1] = np.cos(pos / denominator)
+        return P
 
-    def compute_mask(self, inputs, mask=None):
-        return tf.math.not_equal(inputs, 0)
+    def call(self, x):
+        position_indices = tf.range(tf.shape(x)[-1])
+        embedded_words = self.word_embedding_layer(x)
+        embedded_indices = self.position_embedding_layer(position_indices)
+        return embedded_words + embedded_indices
 
 
-class TransformerDecoderBlock(layers.Layer):
-    def __init__(self, embed_dim, ff_dim, num_heads, vocab_size, **kwargs):
-        super().__init__(**kwargs)
-        self.embed_dim = embed_dim
-        self.ff_dim = ff_dim
-        self.num_heads = num_heads
-        self.vocab_size = vocab_size
-        self.attention_1 = layers.MultiHeadAttention(
+# Encoder Layer
+# class EncoderLayer(layers.Layer):
+#     def __init__(self, embed_dim, ff_dim, num_heads, dropout_rate=0.1, **kwargs):
+#         super(EncoderLayer, self).__init__(**kwargs)
+#         self.multihead_attention = layers.MultiHeadAttention(
+#             num_heads=num_heads, key_dim=embed_dim
+#         )
+#         self.add_norm_1 = AddNormalization()
+#         self.dropout_1 = layers.Dropout(dropout_rate)
+#         self.feed_forward = FeedForward(embed_dim, ff_dim)
+#         self.add_norm_2 = AddNormalization()
+#         self.dropout_2 = layers.Dropout(dropout_rate)
+
+#     def call(self, inputs, training):
+#         multihead_ouput = self.multihead_attention(
+#             query=inputs, value=inputs, key=inputs
+#         )
+#         multihead_ouput = self.dropout_1(multihead_ouput, training=training)
+#         out1 = self.add_norm_1(inputs + multihead_ouput)
+#         feed_forward_output = self.feed_forward(out1)
+#         feed_forward_output = self.dropout_2(feed_forward_output, training=training)
+#         return self.add_norm_2(out1 + feed_forward_output)
+
+
+# Encoder
+class Encoder(layers.Layer):
+    def __init__(
+        self, num_layers, embed_dim, num_heads, ff_dim, dropout_rate=0.1, **kwargs
+    ):
+        super(Encoder, self).__init__(**kwargs)
+        self.multihead_attention = layers.MultiHeadAttention(
             num_heads=num_heads, key_dim=embed_dim
         )
-        self.attention_2 = layers.MultiHeadAttention(
-            num_heads=num_heads, key_dim=embed_dim
+        self.dense = layers.Dense(embed_dim, activation="relu")
+        self.add_norm = layers.LayerNormalization()
+
+    def call(self, inputs, training, mask=None):
+        inputs = self.dense(inputs)
+        multihead_ouput = self.multihead_attention(
+            query=inputs,
+            value=inputs,
+            key=inputs,
+            training=training,
+            attention_mask=mask,
         )
-        self.dense_proj = keras.Sequential(
-            [layers.Dense(ff_dim, activation="relu"), layers.Dense(embed_dim)]
-        )
-        self.layernorm_1 = layers.LayerNormalization()
-        self.layernorm_2 = layers.LayerNormalization()
-        self.layernorm_3 = layers.LayerNormalization()
-
-        self.embedding = PositionalEmbedding(
-            embed_dim=EMBED_DIM, sequence_length=SEQ_LENGTH, vocab_size=self.vocab_size
-        )
-        self.out = layers.Dense(self.vocab_size)
-        self.dropout_1 = layers.Dropout(0.1)
-        self.dropout_2 = layers.Dropout(0.5)
-        self.supports_masking = True
-
-    def call(self, inputs, encoder_outputs, training, mask=None):
-        inputs = self.embedding(inputs)
-        causal_mask = self.get_causal_attention_mask(inputs)
-        inputs = self.dropout_1(inputs, training=training)
-
-        if mask is not None:
-            padding_mask = tf.cast(mask[:, :, tf.newaxis], dtype=tf.int32)
-            combined_mask = tf.cast(mask[:, tf.newaxis, :], dtype=tf.int32)
-            combined_mask = tf.minimum(combined_mask, causal_mask)
-        else:
-            combined_mask = None
-            padding_mask = None
-
-        attention_output_1 = self.attention_1(
-            query=inputs, value=inputs, key=inputs, attention_mask=combined_mask
-        )
-        out_1 = self.layernorm_1(inputs + attention_output_1)
-
-        attention_output_2 = self.attention_2(
-            query=out_1,
-            value=encoder_outputs,
-            key=encoder_outputs,
-            attention_mask=padding_mask,
-        )
-        out_2 = self.layernorm_2(out_1 + attention_output_2)
-
-        proj_output = self.dense_proj(out_2)
-        proj_out = self.layernorm_3(out_2 + proj_output)
-        proj_out = self.dropout_2(proj_out, training=training)
-
-        preds = self.out(proj_out)
-        return preds
-
-    def get_causal_attention_mask(self, inputs):
-        input_shape = tf.shape(inputs)
-        batch_size, sequence_length = input_shape[0], input_shape[1]
-        i = tf.range(sequence_length)[:, tf.newaxis]
-        j = tf.range(sequence_length)
-        mask = tf.cast(i >= j, dtype="int32")
-        mask = tf.reshape(mask, (1, input_shape[1], input_shape[1]))
-        mult = tf.concat(
-            [tf.expand_dims(batch_size, -1), tf.constant([1, 1], dtype=tf.int32)],
-            axis=0,
-        )
-        return tf.tile(mask, mult)
+        enc_output = self.add_norm(inputs + multihead_ouput)
+        return enc_output
 
 
-class ImageCaptioningModel(keras.Model):
+# Decoder Layer
+# class DecoderLayer(layers.Layer):
+# def __init__(self, embed_dim, num_heads, ff_dim, dropout_rate=0.1, **kwargs):
+#     super(DecoderLayer, self).__init__(**kwargs)
+#     self.multihead_attention_1 = layers.MultiHeadAttention(
+#         num_heads=num_heads, key_dim=embed_dim
+#     )
+#     self.multihead_attention_2 = layers.MultiHeadAttention(
+#         num_heads=num_heads, key_dim=embed_dim
+#     )
+#     self.feed_forward = FeedForward(embed_dim, ff_dim)
+#     self.add_norm1 = AddNormalization()
+#     self.add_norm2 = AddNormalization()
+#     self.add_norm3 = AddNormalization()
+#     self.dropout_1 = layers.Dropout(dropout_rate)
+#     self.dropout_2 = layers.Dropout(dropout_rate)
+#     self.dropout_3 = layers.Dropout(dropout_rate)
+
+# def call(self, x, enc_output, training):
+#     multihead_output_1 = self.multihead_attention_1(x, x)
+#     multihead_output_1 = self.dropout_1(multihead_output_1, training=training)
+#     out1 = self.add_norm1(multihead_output_1 + x)
+#     multihead_output_2 = self.multihead_attention_2(
+#         out1, enc_output, value=enc_output
+#     )
+#     multihead_output_2 = self.dropout_2(multihead_output_2, training=training)
+#     out2 = self.add_norm2(multihead_output_2 + out1)
+#     ffn_output = self.feed_forward(out2)
+#     ffn_output = self.dropout_3(ffn_output, training=training)
+#     return self.add_norm3(ffn_output + out2)
+
+
+# Decoder
+class Decoder(layers.Layer):
     def __init__(
         self,
-        cnn_model,
-        encoder,
-        decoder,
-        num_captions_per_image=5,
+        num_layers,
+        embed_dim,
+        num_heads,
+        ff_dim,
+        vocab_size,
+        dropout_rate=0.1,
+        **kwargs
     ):
-        super().__init__()
+        super(Decoder, self).__init__(**kwargs)
+        self.embed_dim = embed_dim
+        self.ff_dim = ff_dim
+        self.num_layers = num_layers
+        self.num_heads = num_heads
+        self.vocab_size = vocab_size
+        self.pos_encoding = PositionalEmbedding(
+            sequence_length=SEQ_LENGTH, vocab_size=vocab_size, embed_dim=EMBED_DIM
+        )
+        self.multihead_attention_1 = layers.MultiHeadAttention(
+            num_heads=num_heads, key_dim=embed_dim
+        )
+        self.multihead_attention_2 = layers.MultiHeadAttention(
+            num_heads=num_heads, key_dim=embed_dim
+        )
+        self.feed_forward = FeedForward(embed_dim, ff_dim)
+        self.add_norm1 = AddNormalization()
+        self.add_norm2 = AddNormalization()
+        self.add_norm3 = AddNormalization()
+        self.dropout_1 = layers.Dropout(dropout_rate)
+        self.dropout_2 = layers.Dropout(0.5)
+        self.output_layer = layers.Dense(vocab_size)
+
+    def call(self, x, enc_output, training):
+        x = self.pos_encoding(x)
+        x = self.dropout_1(x, training=training)
+
+        multihead_output1 = self.multihead_attention_1(
+            query=x, value=x, key=x, training=training
+        )
+        out1 = self.add_norm1(multihead_output1 + x)
+
+        multihead_output2 = self.multihead_attention_2(
+            query=out1,
+            value=enc_output,
+            key=enc_output,
+            training=training,
+        )
+        out2 = self.add_norm2(multihead_output2 + out1)
+
+        ffn_output = self.feed_forward(out2)
+        out3 = self.add_norm3(ffn_output + out2)
+
+        out3 = self.dropout_2(out3, training=training)
+        dec_output = self.output_layer(out3)
+        return dec_output
+
+
+# Image captioning model
+class ImageCaptioningModel(keras.Model):
+    def __init__(self, cnn_model, encoder, decoder, num_captions_per_image=5, **kwargs):
+        super(ImageCaptioningModel, self).__init__(**kwargs)
         self.cnn_model = cnn_model
         self.encoder = encoder
         self.decoder = decoder
@@ -164,10 +244,10 @@ class ImageCaptioningModel(keras.Model):
         self.num_captions_per_image = num_captions_per_image
 
     def call(self, inputs):
-        x = self.cnn_model(inputs[0])
-        x = self.encoder(x, False)
-        x = self.decoder(inputs[2], x, training=inputs[1], mask=None)
-        return x
+        features = self.cnn_model(inputs[0])
+        enc_output = self.encoder(features, False)
+        dec_output = self.decoder(inputs[2], enc_output, training=inputs[1])
+        return dec_output
 
     def calculate_loss(self, y_true, y_pred, mask):
         loss = self.loss(y_true, y_pred)

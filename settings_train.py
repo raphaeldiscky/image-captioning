@@ -5,7 +5,7 @@ DATE_NOW = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
 # CNN model choose between "efficientnet" or "resnet"
 CNN_MODEL = "efficientnet"
 # early stopping
-EARLY_STOPPING = True
+EARLY_STOPPING = False
 # desired image dimensions
 IMAGE_SIZE = (256, 256)
 # max vocabulary size
@@ -23,16 +23,18 @@ SHUFFLE_DIM = 512
 # batch size
 BATCH_SIZE = 64
 # numbers of training epochs
-EPOCHS = 20
+EPOCHS = 5
+# num layers
+NUM_LAYERS = 2
 
 
 # Using karpathy's
 # train = 113287
 # val = 5000
 # test = 5000 (remainder)
-REDUCE_DATASET = False
+REDUCE_DATASET = True
 # number of train images -> it must be a value between [1, 113287]
-NUM_TRAIN_IMG = 113287
+NUM_TRAIN_IMG = 10000
 # number of valid images -> it must be a value between [1, 10000]
 # if NUM_VALID_IMG = 5000, then NUM_TEST_IMG = 5000 is the remainder
 NUM_VALID_IMG = 5000
@@ -47,4 +49,4 @@ valid_data_json_path = "datasets/karpathy_valtest2014_indo.json"  # 10000 data
 text_data_json_path = "datasets/text_data_indo.json"
 
 # save training files directory
-SAVE_DIR = "save_trains/".format(DATE_NOW)
+SAVE_DIR = "save_trains/"

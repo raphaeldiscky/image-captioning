@@ -1,9 +1,9 @@
 import tensorflow as tf
-from settings_train import IMAGE_SIZE
+from settings_train import IMAGE_SIZE, NUM_LAYERS
 from models import (
     get_cnn_model,
-    TransformerEncoderBlock,
-    TransformerDecoderBlock,
+    Decoder,
+    Encoder,
     ImageCaptioningModel,
 )
 from datasets import read_image_inf
@@ -29,11 +29,16 @@ def get_inference_model(model_config_path):
     CNN_MODEL = model_config["CNN_MODEL"]
 
     cnn_model = get_cnn_model(CNN_MODEL)
-    encoder = TransformerEncoderBlock(
-        embed_dim=EMBED_DIM, dense_dim=FF_DIM, num_heads=NUM_HEADS
+    encoder = Encoder(
+        num_layers=NUM_LAYERS, embed_dim=EMBED_DIM, num_heads=NUM_HEADS, ff_dim=FF_DIM
     )
-    decoder = TransformerDecoderBlock(
-        embed_dim=EMBED_DIM, ff_dim=FF_DIM, num_heads=NUM_HEADS, vocab_size=VOCAB_SIZE
+
+    decoder = Decoder(
+        num_layers=NUM_LAYERS,
+        embed_dim=EMBED_DIM,
+        num_heads=NUM_HEADS,
+        ff_dim=FF_DIM,
+        vocab_size=VOCAB_SIZE,
     )
     caption_model = ImageCaptioningModel(
         cnn_model=cnn_model, encoder=encoder, decoder=decoder

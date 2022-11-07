@@ -1,5 +1,5 @@
 # change this date to the date you want to inference and plot
-DATE_TO_INFERENCE = "10_20_2022_01_31_59"
+DATE_TO_INFERENCE = "10_20_2022_10_02_18"
 
 # For inference.py and inference_all.py
 # choose to validate on "test" or "val" dataset

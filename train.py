@@ -24,6 +24,7 @@ from settings_train import (
     SEQ_LENGTH,
     TRAIN_SET_AUG,
     EARLY_STOPPING,
+    NUM_LAYERS,
 )
 from datasets import (
     make_dataset,
@@ -34,8 +35,8 @@ from datasets import (
 from custom_schedule import custom_schedule
 from models import (
     get_cnn_model,
-    TransformerEncoderBlock,
-    TransformerDecoderBlock,
+    Decoder,
+    Encoder,
     ImageCaptioningModel,
 )
 from utils import save_tokenizer
@@ -125,12 +126,18 @@ test_dataset = make_dataset(
 # get model
 cnn_model = get_cnn_model(CNN_MODEL)
 
-encoder = TransformerEncoderBlock(
-    embed_dim=EMBED_DIM, dense_dim=FF_DIM, num_heads=NUM_HEADS
+encoder = Encoder(
+    num_layers=NUM_LAYERS, embed_dim=EMBED_DIM, num_heads=NUM_HEADS, ff_dim=FF_DIM
 )
-decoder = TransformerDecoderBlock(
-    embed_dim=EMBED_DIM, ff_dim=FF_DIM, num_heads=NUM_HEADS, vocab_size=VOCAB_SIZE
+
+decoder = Decoder(
+    num_layers=NUM_LAYERS,
+    embed_dim=EMBED_DIM,
+    num_heads=NUM_HEADS,
+    ff_dim=FF_DIM,
+    vocab_size=VOCAB_SIZE,
 )
+
 caption_model = ImageCaptioningModel(
     cnn_model=cnn_model, encoder=encoder, decoder=decoder
 )
