@@ -1,6 +1,6 @@
 import tensorflow as tf
 from settings_train import EMBED_DIM, IMAGE_SIZE, SEQ_LENGTH
-from tensorflow.keras import layers, Model
+from tensorflow.keras import layers
 from tensorflow import keras
 from tensorflow.keras.applications import efficientnet, resnet
 
@@ -24,7 +24,6 @@ def get_cnn_model(selected_cnn_model):
         base_model_out = base_model.output
         base_model_out = layers.Reshape((-1, 2048))(base_model_out)
         cnn_model = keras.models.Model(base_model.input, base_model_out)
-
     return cnn_model
 
 
@@ -57,21 +56,19 @@ class Encoder(layers.Layer):
         super().__init__(**kwargs)
         self.embed_dim = embed_dim
         self.num_heads = num_heads
+        self.ff_dim = ff_dim
         self.multihead_attention = layers.MultiHeadAttention(
             num_heads=num_heads, key_dim=embed_dim
         )
-        self.addnorm = layers.LayerNormalization()
+        self.dense_proj = layers.Dense(embed_dim, activation="relu")
+        self.addnorm_1 = layers.LayerNormalization()
 
-    def build_graph(self):
-        input_layer = layers.Input(shape=(SEQ_LENGTH, self.embed_dim))
-        return Model(inputs=[input_layer], outputs=self.call(input_layer))
-
-    def call(self, inputs):
+    def call(self, inputs, training, mask=None):
         inputs = self.dense_proj(inputs)
         mha_output = self.multihead_attention(
             query=inputs, value=inputs, key=inputs, attention_mask=None
         )
-        enc_output = self.addnorm(inputs + mha_output)
+        enc_output = self.addnorm_1(inputs + mha_output)
         return enc_output
 
 
@@ -82,7 +79,6 @@ class Decoder(layers.Layer):
         self.ff_dim = ff_dim
         self.num_heads = num_heads
         self.vocab_size = vocab_size
-        self.build(input_shape=[None, SEQ_LENGTH, embed_dim])
 
         self.multihead_attention_1 = layers.MultiHeadAttention(
             num_heads=num_heads, key_dim=embed_dim
@@ -100,17 +96,10 @@ class Decoder(layers.Layer):
         self.embedding = PositionalEmbedding(
             embed_dim=EMBED_DIM, sequence_length=SEQ_LENGTH, vocab_size=self.vocab_size
         )
-        self.model_last_layer = layers.Dense(self.vocab_size)
+        self.dense = layers.Dense(self.vocab_size)
         self.dropout_1 = layers.Dropout(0.1)
         self.dropout_2 = layers.Dropout(0.5)
         self.supports_masking = True
-
-    def build_graph(self):
-        input_layer = layers.Input(shape=(SEQ_LENGTH, self.embed_dim))
-        return Model(
-            inputs=[input_layer],
-            outputs=self.call(input_layer, input_layer, True, mask=None),
-        )
 
     def call(self, inputs, encoder_outputs, training, mask=None):
         inputs = self.embedding(inputs)
@@ -128,22 +117,22 @@ class Decoder(layers.Layer):
         mha_output_1 = self.multihead_attention_1(
             query=inputs, value=inputs, key=inputs, attention_mask=combined_mask
         )
-        addnorm_output1 = self.addnorm_1(inputs + mha_output_1)
+        addnorm_output_1 = self.addnorm_1(inputs + mha_output_1)
 
         mha_output_2 = self.multihead_attention_2(
-            query=addnorm_output1,
+            query=addnorm_output_1,
             value=encoder_outputs,
             key=encoder_outputs,
             attention_mask=padding_mask,
         )
-        addnorm_output2 = self.addnorm_2(addnorm_output1 + mha_output_2)
+        addnorm_output_2 = self.addnorm_2(addnorm_output_1 + mha_output_2)
 
-        ff_output = self.feed_forward(addnorm_output2)
-        addnorm_output3 = self.addnorm_3(addnorm_output2 + ff_output)
+        ff_output = self.feed_forward(addnorm_output_2)
+        addnorm_output3 = self.addnorm_3(addnorm_output_2 + ff_output)
         addnorm_output3 = self.dropout_2(addnorm_output3, training=training)
 
-        enc_output = self.model_last_layer(addnorm_output3)
-        return enc_output
+        dec_output = self.dense(addnorm_output3)
+        return dec_output
 
     def get_causal_attention_mask(self, inputs):
         input_shape = tf.shape(inputs)
