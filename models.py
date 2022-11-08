@@ -1,6 +1,6 @@
 import tensorflow as tf
 from settings_train import EMBED_DIM, IMAGE_SIZE, SEQ_LENGTH
-from tensorflow.keras import layers
+from tensorflow.keras import layers, Model
 from tensorflow import keras
 from tensorflow.keras.applications import efficientnet, resnet
 
@@ -57,13 +57,19 @@ class Encoder(layers.Layer):
         self.embed_dim = embed_dim
         self.num_heads = num_heads
         self.ff_dim = ff_dim
+        self.build(input_shape=[None, SEQ_LENGTH, embed_dim])
+
         self.multihead_attention = layers.MultiHeadAttention(
             num_heads=num_heads, key_dim=embed_dim
         )
         self.dense_proj = layers.Dense(embed_dim, activation="relu")
         self.addnorm_1 = layers.LayerNormalization()
 
-    def call(self, inputs, training, mask=None):
+    def build_graph(self):
+        input_layer = layers.Input(shape=(SEQ_LENGTH, self.embed_dim))
+        return Model(inputs=[input_layer], outputs=self.call(input_layer))
+
+    def call(self, inputs):
         inputs = self.dense_proj(inputs)
         mha_output = self.multihead_attention(
             query=inputs, value=inputs, key=inputs, attention_mask=None
@@ -166,7 +172,7 @@ class ImageCaptioningModel(keras.Model):
 
     def call(self, inputs):
         x = self.cnn_model(inputs[0])
-        x = self.encoder(x, False)
+        x = self.encoder(x)
         x = self.decoder(inputs[2], x, training=inputs[1], mask=None)
         return x
 
