@@ -1,9 +1,9 @@
 from matplotlib import pyplot as plt
-from settings_inference import DATE_TO_EVALUATE, MODEL_CONFIG_PATH
+from settings_inference import DATE_TO_INFERENCE, MODEL_CONFIG_PATH
 import json
 import os
 
-with open("./save_trains/{}/history.json".format(DATE_TO_EVALUATE)) as json_file:
+with open("./save_trains/{}/history.json".format(DATE_TO_INFERENCE)) as json_file:
     history_dict = json.load(json_file)
 
 with open(MODEL_CONFIG_PATH) as json_file:
@@ -15,7 +15,7 @@ NUM_HEADS = model_config["NUM_HEADS"]
 
 def plot_accuracy():
     # create new directory for saving plot
-    SAVE_DIR = "save_plots/" + DATE_TO_EVALUATE
+    SAVE_DIR = "save_plots/" + DATE_TO_INFERENCE
     if not os.path.exists(SAVE_DIR):
         os.makedirs(SAVE_DIR)
 
@@ -39,13 +39,13 @@ def plot_accuracy():
     plt.ylabel("accuracy")
     plt.legend()
     plt.xticks(range(1, len(history_dict["acc"]) + 1))
-    plt.savefig("./save_plots/{}/model_accuracy.png".format(DATE_TO_EVALUATE))
+    plt.savefig("./save_plots/{}/model_accuracy.png".format(DATE_TO_INFERENCE))
 
 
 def plot_loss():
     plt.figure()
     # create new directory for saving plot
-    SAVE_DIR = "save_plots/" + DATE_TO_EVALUATE
+    SAVE_DIR = "save_plots/" + DATE_TO_INFERENCE
     if not os.path.exists(SAVE_DIR):
         os.makedirs(SAVE_DIR)
 
@@ -69,7 +69,7 @@ def plot_loss():
     plt.ylabel("loss")
     plt.legend()
     plt.xticks(range(1, len(history_dict["loss"]) + 1))
-    plt.savefig("./save_plots/{}/model_loss.png".format(DATE_TO_EVALUATE))
+    plt.savefig("./save_plots/{}/model_loss.png".format(DATE_TO_INFERENCE))
 
 
 plot_accuracy()

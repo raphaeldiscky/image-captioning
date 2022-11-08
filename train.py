@@ -38,6 +38,7 @@ from models import (
     Encoder,
     ImageCaptioningModel,
 )
+import pandas as pd
 from utils import save_tokenizer
 import json
 from tensorflow import keras
@@ -121,6 +122,9 @@ test_dataset = make_dataset(
     data_aug=False,
     tokenizer=tokenizer,
 )
+
+df = pd.DataFrame(train_dataset)
+print(df.shape)
 
 # get model
 cnn_model = get_cnn_model(CNN_MODEL)

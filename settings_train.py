@@ -3,7 +3,7 @@ from datetime import datetime
 DATE_NOW = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
 
 # CNN model choose between "efficientnet" or "resnet"
-CNN_MODEL = "efficientnet"
+CNN_MODEL = "resnet"
 # early stopping
 EARLY_STOPPING = False
 # desired image dimensions
@@ -23,7 +23,7 @@ SHUFFLE_DIM = 512
 # batch size
 BATCH_SIZE = 64
 # numbers of training epochs
-EPOCHS = 5
+EPOCHS = 20
 
 
 # Using karpathy's

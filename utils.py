@@ -55,16 +55,16 @@ def generate_caption(image_path, caption_model, tokenizer, SEQ_LENGTH):
     index_lookup = dict(zip(range(len(vocab)), vocab))
     max_decoded_sentence_length = SEQ_LENGTH - 1
 
-    # read the image from the disk
+    # read the image from the local
     img = read_image_inf(image_path)
 
-    # pass the image to the CNN
+    # pass the image to the CNN model
     img = caption_model.cnn_model(img)
 
-    # pass the image features to the Transformer encoder
+    # pass the image features to the encoder
     encoded_img = caption_model.encoder(img, training=False)
 
-    # generate the caption using the Transformer decoder
+    # generate the caption using the decoder
     decoded_caption = "<start>"
     for i in range(max_decoded_sentence_length):
         tokenized_caption = tokenizer([decoded_caption])[:, :-1]

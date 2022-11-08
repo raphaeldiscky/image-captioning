@@ -14,7 +14,7 @@ from itertools import islice
 
 print("\n\nINFERENCE ALL: {}\n\n".format(DATE_TO_INFERENCE))
 
-# get tokenizer layer from disk
+# get tokenizer layer from local
 tokenizer = tf.keras.models.load_model(TOKENIZER_PATH)
 tokenizer = tokenizer.layers[1]
 
@@ -29,10 +29,10 @@ list = []
 with open(MODEL_CONFIG_PATH) as json_file:
     model_config = json.load(json_file)
 
-with open("datasets/karpathy_valtest2014_indo.json") as karpathy_val2014_indo:
-    data = json.load(karpathy_val2014_indo)
+with open("datasets/karpathy_valtest2014_indo.json") as karpathy_valtest2014_indo:
+    data = json.load(karpathy_valtest2014_indo)
 
-# looping through karpahy test dataset
+# looping through val or test dataset
 iteration = 1
 if DATASET_TO_INFERENCE == "test":
     for key, value in islice(data.items(), 5000, len(data)):
