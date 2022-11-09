@@ -41,7 +41,6 @@ def get_inference_model(model_config_path):
         cnn_model=cnn_model, encoder=encoder, decoder=decoder
     )
 
-    # it's necessary for init model -> without it, weights subclass model fails
     cnn_input = tf.keras.layers.Input(shape=(IMAGE_SIZE[0], IMAGE_SIZE[1], 3))
     training = False
     decoder_input = tf.keras.layers.Input(shape=(None,))

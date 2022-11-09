@@ -1,6 +1,6 @@
 import tensorflow as tf
 from settings_train import EMBED_DIM, IMAGE_SIZE, SEQ_LENGTH
-from tensorflow.keras import layers, Model
+from tensorflow.keras import layers
 from tensorflow import keras
 from tensorflow.keras.applications import efficientnet, resnet
 
@@ -24,6 +24,7 @@ def get_cnn_model(selected_cnn_model):
         base_model_out = base_model.output
         base_model_out = layers.Reshape((-1, 2048))(base_model_out)
         cnn_model = keras.models.Model(base_model.input, base_model_out)
+
     return cnn_model
 
 
@@ -52,24 +53,18 @@ class PositionalEmbedding(layers.Layer):
 
 
 class Encoder(layers.Layer):
-    def __init__(self, embed_dim, num_heads, ff_dim, **kwargs):
+    def __init__(self, embed_dim, ff_dim, num_heads, **kwargs):
         super().__init__(**kwargs)
         self.embed_dim = embed_dim
-        self.num_heads = num_heads
         self.ff_dim = ff_dim
-        self.build(input_shape=[None, SEQ_LENGTH, embed_dim])
-
+        self.num_heads = num_heads
         self.multihead_attention = layers.MultiHeadAttention(
             num_heads=num_heads, key_dim=embed_dim
         )
         self.dense_proj = layers.Dense(embed_dim, activation="relu")
         self.addnorm_1 = layers.LayerNormalization()
 
-    def build_graph(self):
-        input_layer = layers.Input(shape=(SEQ_LENGTH, self.embed_dim))
-        return Model(inputs=[input_layer], outputs=self.call(input_layer))
-
-    def call(self, inputs):
+    def call(self, inputs, training, mask=None):
         inputs = self.dense_proj(inputs)
         mha_output = self.multihead_attention(
             query=inputs, value=inputs, key=inputs, attention_mask=None
@@ -86,12 +81,14 @@ class Decoder(layers.Layer):
         self.num_heads = num_heads
         self.vocab_size = vocab_size
 
+        
         self.multihead_attention_1 = layers.MultiHeadAttention(
             num_heads=num_heads, key_dim=embed_dim
         )
         self.multihead_attention_2 = layers.MultiHeadAttention(
             num_heads=num_heads, key_dim=embed_dim
         )
+
         self.feed_forward = keras.Sequential(
             [layers.Dense(ff_dim, activation="relu"), layers.Dense(embed_dim)]
         )
@@ -102,6 +99,10 @@ class Decoder(layers.Layer):
         self.embedding = PositionalEmbedding(
             embed_dim=EMBED_DIM, sequence_length=SEQ_LENGTH, vocab_size=self.vocab_size
         )
+
+        self.out = layers.Dense(self.vocab_size)
+        self.dropout_1 = layers.Dropout(0.1)
+        self.dropout_2 = layers.Dropout(0.5)
         self.dense = layers.Dense(self.vocab_size)
         self.dropout_1 = layers.Dropout(0.1)
         self.dropout_2 = layers.Dropout(0.5)
@@ -172,7 +173,7 @@ class ImageCaptioningModel(keras.Model):
 
     def call(self, inputs):
         x = self.cnn_model(inputs[0])
-        x = self.encoder(x)
+        x = self.encoder(x, False)
         x = self.decoder(inputs[2], x, training=inputs[1], mask=None)
         return x
 

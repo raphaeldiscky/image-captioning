@@ -5,7 +5,7 @@ DATE_NOW = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
 # CNN model choose between "efficientnet" or "resnet"
 CNN_MODEL = "resnet"
 # early stopping
-EARLY_STOPPING = False
+EARLY_STOPPING = True
 # desired image dimensions
 IMAGE_SIZE = (256, 256)
 # max vocabulary size
@@ -23,7 +23,7 @@ SHUFFLE_DIM = 512
 # batch size
 BATCH_SIZE = 64
 # numbers of training epochs
-EPOCHS = 20
+EPOCHS = 1
 
 
 # Using karpathy's

@@ -1,7 +1,7 @@
 from pycocotools.coco import COCO
 from pycocoevalcap.eval import COCOEvalCap
 from settings_evaluation import (
-    INFERENCE_ALL_RESULT_PATH,
+    INFERENCE_TEST_RESULT_PATH,
     VAL_RAW_PATH,
     DATE_TO_EVALUATE,
 )
@@ -16,14 +16,12 @@ results = []
 
 # create coco object and coco_result object
 coco = COCO(VAL_RAW_PATH)
-coco_result = coco.loadRes(INFERENCE_ALL_RESULT_PATH)
+coco_result = coco.loadRes(INFERENCE_TEST_RESULT_PATH)
 
 # create coco_eval object by taking coco and coco_result
 coco_eval = COCOEvalCap(coco, coco_result)
 
-# evaluate on a subset of images by setting
-# coco_eval.params["image_id"] = coco_result.getImgIds()
-# please remove this line when evaluating the full validation set
+# get ids of images
 coco_eval.params["image_id"] = coco_result.getImgIds()
 
 # evaluate results

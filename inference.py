@@ -2,7 +2,7 @@ from settings_inference import (
     MODEL_CONFIG_PATH,
     MODEL_WEIGHT_PATH,
     TOKENIZER_PATH,
-    DATE_TO_EVALUATE,
+    DATASET_TO_INFERENCE,
 )
 from utils import get_inference_model, generate_caption
 import json
@@ -10,7 +10,7 @@ import tensorflow as tf
 import argparse
 
 
-print("\n\nINFERENCE: {}\n\n".format(DATE_TO_EVALUATE))
+print("\n\nINFERENCE: {}\n\n".format(DATASET_TO_INFERENCE))
 
 # get tokenizer layer from disk
 tokenizer = tf.keras.models.load_model(TOKENIZER_PATH)

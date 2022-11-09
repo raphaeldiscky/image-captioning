@@ -19,6 +19,17 @@ def custom_standardization(input_string):
     return tf.strings.regex_replace(lowercase, "[%s]" % re.escape(remove_chars), "")
 
 
+def add_token(list_of_list_captions):
+    newLists = []
+    for index, _ in enumerate(list_of_list_captions):
+        new_captions = [
+            "<start> {} <end>".format(caption)
+            for caption in list_of_list_captions[index]
+        ]
+        newLists.append(new_captions)
+    return newLists
+
+
 def train_val_split(caption_data, train_size=0.8, shuffle=True):
     # get the list of all image names
     all_images = list(caption_data.keys())
@@ -98,15 +109,17 @@ img_transform = tf.keras.Sequential(
 )
 
 
-def make_dataset(images, captions, data_aug, tokenizer):
+def make_dataset(images, list_of_list_captions, data_aug, tokenizer):
     read_image_xx = read_image(data_aug)
     img_dataset = tf.data.Dataset.from_tensor_slices(images)
 
     img_dataset = img_dataset.map(read_image_xx, num_parallel_calls=AUTOTUNE)
 
-    cap_dataset = tf.data.Dataset.from_tensor_slices(captions).map(
-        tokenizer, num_parallel_calls=AUTOTUNE
-    )
+    list_of_list_captions_with_token = add_token(list_of_list_captions)
+
+    cap_dataset = tf.data.Dataset.from_tensor_slices(
+        list_of_list_captions_with_token
+    ).map(tokenizer, num_parallel_calls=AUTOTUNE)
 
     dataset = tf.data.Dataset.zip((img_dataset, cap_dataset))
     dataset = dataset.batch(BATCH_SIZE).shuffle(SHUFFLE_DIM).prefetch(AUTOTUNE)

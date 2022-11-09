@@ -18,6 +18,7 @@ print("\n\nINFERENCE ALL: {}\n\n".format(DATE_TO_INFERENCE))
 tokenizer = tf.keras.models.load_model(TOKENIZER_PATH)
 tokenizer = tokenizer.layers[1]
 
+
 # get model
 model = get_inference_model(MODEL_CONFIG_PATH)
 
@@ -73,7 +74,10 @@ if not os.path.exists(SAVE_DIR):
     os.makedirs(SAVE_DIR)
 
 
-with open("{}/captions_karpathy_test_results_indo.json".format(SAVE_DIR), "w") as fp:
+with open(
+    "{}/captions_karpathy_{}_results_indo.json".format(SAVE_DIR, DATASET_TO_INFERENCE),
+    "w",
+) as fp:
     json.dump(list, fp)
 
 # save config inference

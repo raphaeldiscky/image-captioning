@@ -1,0 +1,14 @@
+[
+    "Bleu_1: 0.660",
+    "Bleu_2: 0.487",
+    "Bleu_3: 0.342",
+    "Bleu_4: 0.236",
+    "METEOR: 0.236",
+    "ROUGE_L: 0.499",
+    "CIDEr: 0.921",
+    {
+        "EPOCH": 12,
+        "CNN_MODEL": "efficientnet",
+        "NUM_HEADS": 2
+    }
+]
