@@ -18,7 +18,6 @@ print("\n\nINFERENCE ALL: {}\n\n".format(DATE_TO_INFERENCE))
 tokenizer = tf.keras.models.load_model(TOKENIZER_PATH)
 tokenizer = tokenizer.layers[1]
 
-
 # get model
 model = get_inference_model(MODEL_CONFIG_PATH)
 

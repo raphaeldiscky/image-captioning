@@ -74,7 +74,7 @@ VOCAB_SIZE = len(tokenizer.get_vocabulary())
 
 print("Vocab size: ", VOCAB_SIZE)
 
-# Split dataset to valid and test set
+# split dataset to valid and test set
 valid_data, test_data = valid_test_split(valid_data)
 
 print("Validation data after splitting with test set: ", len(valid_data))
@@ -102,8 +102,8 @@ print(config_train)
 
 # setting batch dataset
 train_dataset = make_dataset(
-    list(train_data.keys()),
-    list(train_data.values()),
+    list(train_data.keys()),  # path to images
+    list(train_data.values()),  # captions
     data_aug=TRAIN_SET_AUG,
     tokenizer=tokenizer,
 )

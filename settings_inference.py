@@ -1,7 +1,7 @@
 # change this date to the date you want to inference and plot
-DATE_TO_INFERENCE = "11_09_2022_17_27_19"
+DATE_TO_INFERENCE = "11_10_2022_15_57_24"
 
-# For inference.py and inference_all.py
+# for inference.py and inference_all.py
 # choose to validate on "test" or "val" dataset
 DATASET_TO_INFERENCE = "test"
 # tokenizer model saved path
