@@ -1,9 +1,17 @@
 import tensorflow as tf
 from settings_train import EMBED_DIM, IMAGE_SIZE, SEQ_LENGTH
-from tensorflow.keras import layers
+from tensorflow.keras.layers import (
+    Layer,
+    Reshape,
+    LayerNormalization,
+    Dense,
+    ReLU,
+    Dropout,
+    MultiHeadAttention,
+)
 from tensorflow import keras
 from tensorflow.keras.applications import efficientnet, resnet
-import numpy as np
+from positional_embedding import PositionalEmbedding
 
 
 def get_cnn_model(selected_cnn_model):
@@ -14,7 +22,7 @@ def get_cnn_model(selected_cnn_model):
         # freeze feature extractor layers
         base_model.trainable = False
         base_model_out = base_model.output
-        base_model_out = layers.Reshape((-1, 1280))(base_model_out)
+        base_model_out = Reshape((-1, 1280))(base_model_out)
         cnn_model = keras.models.Model(base_model.input, base_model_out)
     elif selected_cnn_model == "resnet":
         base_model = resnet.ResNet101(
@@ -23,113 +31,82 @@ def get_cnn_model(selected_cnn_model):
         # freeze feature extractor layers
         base_model.trainable = False
         base_model_out = base_model.output
-        base_model_out = layers.Reshape((-1, 2048))(base_model_out)
+        base_model_out = Reshape((-1, 2048))(base_model_out)
         cnn_model = keras.models.Model(base_model.input, base_model_out)
     return cnn_model
 
 
-class AddNormalization(layers.Layer):
+class AddNormalization(Layer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.layer_norm = layers.LayerNormalization()
+        self.layer_norm = LayerNormalization()
 
-    def call(self, x):
-        return self.layer_norm(x)
+    def call(self, x, sublayer_x):
+        add = x + sublayer_x
+        return self.layer_norm(add)
 
 
-class FeedForward(layers.Layer):
+class FeedForward(Layer):
     def __init__(self, embed_dim, ff_dim, **kwargs):
         super().__init__(**kwargs)
-        self.dense_1 = layers.Dense(ff_dim)
-        self.dense_2 = layers.Dense(embed_dim)
-        self.relu = layers.ReLU()
+        self.dense_1 = Dense(ff_dim)
+        self.dense_2 = Dense(embed_dim)
+        self.relu = ReLU()
 
     def call(self, inputs):
         x = self.dense_1(inputs)
         return self.dense_2(self.relu(x))
 
 
-class PositionalEmbedding(layers.Layer):
-    def __init__(self, sequence_length, vocab_size, embed_dim, **kwargs):
-        super().__init__(**kwargs)
-        word_embedding_matrix = self.get_position_encoding(vocab_size, embed_dim)
-        position_embedding_matrix = self.get_position_encoding(
-            sequence_length, embed_dim
-        )
-        self.word_embedding_layer = layers.Embedding(
-            input_dim=vocab_size,
-            output_dim=embed_dim,
-            weights=[word_embedding_matrix],
-            trainable=False,
-        )
-        self.position_embedding_layer = layers.Embedding(
-            input_dim=sequence_length,
-            output_dim=embed_dim,
-            weights=[position_embedding_matrix],
-            trainable=False,
-        )
-
-    def get_position_encoding(self, seq_len, d, n=10000):
-        P = np.zeros((seq_len, d))
-        for pos in range(seq_len):
-            for i in np.arange(int(d / 2)):
-                denominator = np.power(n, 2 * i / d)
-                P[pos, 2 * i] = np.sin(pos / denominator)
-                P[pos, 2 * i + 1] = np.cos(pos / denominator)
-        return P
-
-    def call(self, inputs):
-        position_indices = tf.range(tf.shape(inputs)[-1])
-        embedded_words = self.word_embedding_layer(inputs)
-        embedded_indices = self.position_embedding_layer(position_indices)
-        return embedded_words + embedded_indices
-
-
-class Encoder(layers.Layer):
-    def __init__(self, embed_dim, ff_dim, num_heads, **kwargs):
+class Encoder(Layer):
+    def __init__(self, embed_dim, ff_dim, num_heads, key_dim, value_dim, **kwargs):
         super().__init__(**kwargs)
         self.embed_dim = embed_dim
         self.ff_dim = ff_dim
         self.num_heads = num_heads
-
-        self.dense_proj = layers.Dense(embed_dim, activation="relu")
-        self.multihead_attention = layers.MultiHeadAttention(
-            num_heads=num_heads, key_dim=embed_dim
+        self.key_dim = key_dim
+        self.value_dim = value_dim
+        self.dense = Dense(embed_dim, activation="relu")
+        self.multihead_attention = MultiHeadAttention(
+            num_heads=num_heads, key_dim=key_dim, value_dim=value_dim
         )
-        self.dropout_1 = layers.Dropout(0.1)
+        self.dropout_1 = Dropout(0.1)
         self.add_norm1 = AddNormalization()
         self.feed_forward = FeedForward(embed_dim, ff_dim)
-        self.dropout_2 = layers.Dropout(0.1)
+        self.dropout_2 = Dropout(0.1)
         self.add_norm2 = AddNormalization()
 
     def call(self, inputs, training, mask=None):
-        inputs = self.dense_proj(inputs)
+        inputs = self.dense(inputs)
         multihead_attention_output = self.multihead_attention(
             query=inputs, value=inputs, key=inputs, attention_mask=None
         )
         multihead_attention_output = self.dropout_1(
             multihead_attention_output, training
         )
-        addnorm_output_1 = self.add_norm1(inputs + multihead_attention_output)
-        feed_forward_output = self.feed_forward(addnorm_output_1)
+        addnorm_output = self.add_norm1(inputs, multihead_attention_output)
+        feed_forward_output = self.feed_forward(addnorm_output)
         feed_forward_output = self.dropout_2(feed_forward_output, training)
-        enc_output = self.add_norm2(addnorm_output_1 + feed_forward_output)
+        enc_output = self.add_norm2(addnorm_output, feed_forward_output)
         return enc_output
 
 
-class Decoder(layers.Layer):
-    def __init__(self, embed_dim, ff_dim, num_heads, vocab_size, **kwargs):
+class Decoder(Layer):
+    def __init__(
+        self, embed_dim, ff_dim, num_heads, vocab_size, key_dim, value_dim, **kwargs
+    ):
         super().__init__(**kwargs)
         self.embed_dim = embed_dim
         self.ff_dim = ff_dim
         self.num_heads = num_heads
         self.vocab_size = vocab_size
-
-        self.multihead_attention_1 = layers.MultiHeadAttention(
-            num_heads=num_heads, key_dim=embed_dim
+        self.key_dim = key_dim
+        self.value_dim = value_dim
+        self.multihead_attention_1 = MultiHeadAttention(
+            num_heads=num_heads, key_dim=key_dim, value_dim=value_dim
         )
-        self.multihead_attention_2 = layers.MultiHeadAttention(
-            num_heads=num_heads, key_dim=embed_dim
+        self.multihead_attention_2 = MultiHeadAttention(
+            num_heads=num_heads, key_dim=key_dim, value_dim=value_dim
         )
         self.feed_forward = FeedForward(embed_dim, ff_dim)
         self.add_norm1 = AddNormalization()
@@ -138,10 +115,10 @@ class Decoder(layers.Layer):
         self.pos_encoding = PositionalEmbedding(
             embed_dim=EMBED_DIM, sequence_length=SEQ_LENGTH, vocab_size=self.vocab_size
         )
-        self.dropout_1 = layers.Dropout(0.1)
-        self.dropout_2 = layers.Dropout(0.1)
-        self.dropout_3 = layers.Dropout(0.1)
-        self.out = layers.Dense(self.vocab_size)
+        self.dropout_1 = Dropout(0.1)
+        self.dropout_2 = Dropout(0.1)
+        self.dropout_3 = Dropout(0.1)
+        self.dense = Dense(self.vocab_size)
         self.supports_masking = True
 
     def call(self, inputs, encoder_outputs, training, mask=None):
@@ -160,7 +137,7 @@ class Decoder(layers.Layer):
             query=inputs, value=inputs, key=inputs, attention_mask=combined_mask
         )
         multihead_output_1 = self.dropout_1(multihead_output_1, training=training)
-        addnorm_output_1 = self.add_norm1(inputs + multihead_output_1)
+        addnorm_output_1 = self.add_norm1(inputs, multihead_output_1)
 
         multihead_output_2 = self.multihead_attention_2(
             query=addnorm_output_1,
@@ -169,13 +146,13 @@ class Decoder(layers.Layer):
             attention_mask=padding_mask,
         )
         multihead_output_2 = self.dropout_2(multihead_output_2, training=training)
-        addnorm_output_2 = self.add_norm2(addnorm_output_1 + multihead_output_2)
+        addnorm_output_2 = self.add_norm2(addnorm_output_1, multihead_output_2)
 
         ff_output = self.feed_forward(addnorm_output_2)
         ff_output = self.dropout_3(ff_output, training=training)
 
-        addnorm_output_3 = self.add_norm3(addnorm_output_2 + ff_output)
-        dec_output = self.out(addnorm_output_3)
+        addnorm_output_3 = self.add_norm3(addnorm_output_2, ff_output)
+        dec_output = self.dense(addnorm_output_3)
         return dec_output
 
     def get_causal_attention_mask(self, inputs):

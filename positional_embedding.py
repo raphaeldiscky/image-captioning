@@ -1,22 +1,22 @@
 import tensorflow as tf
-from tensorflow.keras import layers
+from tensorflow.keras.layers import Layer, Embedding
 import numpy as np
 
 
-class PositionalEmbedding(layers.Layer):
+class PositionalEmbedding(Layer):
     def __init__(self, sequence_length, vocab_size, embed_dim, **kwargs):
         super().__init__(**kwargs)
         word_embedding_matrix = self.get_position_encoding(vocab_size, embed_dim)
         position_embedding_matrix = self.get_position_encoding(
             sequence_length, embed_dim
         )
-        self.word_embedding_layer = layers.Embedding(
+        self.word_embedding_layer = Embedding(
             input_dim=vocab_size,
             output_dim=embed_dim,
             weights=[word_embedding_matrix],
             trainable=False,
         )
-        self.position_embedding_layer = layers.Embedding(
+        self.position_embedding_layer = Embedding(
             input_dim=sequence_length,
             output_dim=embed_dim,
             weights=[position_embedding_matrix],

@@ -23,7 +23,11 @@ SHUFFLE_DIM = 512
 # batch size
 BATCH_SIZE = 64
 # numbers of training epochs
-EPOCHS = 12
+EPOCHS = 1
+# dimesion of the linearly projected queries and keys
+KEY_DIM = 64
+# dimension of the linearly projected values
+VALUE_DIM = 64
 
 
 # USING KARPATHY SPLIT
@@ -44,7 +48,7 @@ VALID_SET_AUG = False
 # for Indonesian dataset
 train_data_json_path = "datasets/karpathy_train2014_indo.json"  # 113287 data
 valid_data_json_path = "datasets/karpathy_valtest2014_indo.json"  # 10000 data
-sentence_data_json_path = "datasets/sentence_data_indo.json"  # list of sentences
+captions_data_json_path = "datasets/captions_data_indo.json"  # list of captions
 
 # save training files directory
 SAVE_DIR = "save_trains/"

@@ -20,12 +20,14 @@ from settings_train import (
     VALID_SET_AUG,
     train_data_json_path,
     valid_data_json_path,
-    sentence_data_json_path,
+    captions_data_json_path,
     REDUCE_DATASET,
     MAX_VOCAB_SIZE,
     SEQ_LENGTH,
     TRAIN_SET_AUG,
     EARLY_STOPPING,
+    KEY_DIM,
+    VALUE_DIM,
 )
 from datasets import (
     make_dataset,
@@ -47,8 +49,8 @@ with open(train_data_json_path) as json_file:
     train_data = json.load(json_file)
 with open(valid_data_json_path) as json_file:
     valid_data = json.load(json_file)
-with open(sentence_data_json_path) as json_file:
-    sentence_data = json.load(json_file)
+with open(captions_data_json_path) as json_file:
+    captions_data = json.load(json_file)
 
 # for reduce number of images in the dataset
 if REDUCE_DATASET:
@@ -66,7 +68,7 @@ tokenizer = TextVectorization(
 )
 
 # adapt tokenizer to create the vocabulary
-tokenizer.adapt(sentence_data)
+tokenizer.adapt(captions_data)
 
 # define vocabulary size of the vocabulary
 vocab_size = len(tokenizer.get_vocabulary())
@@ -91,6 +93,8 @@ config_train = {
     "BATCH_SIZE": BATCH_SIZE,
     "EPOCHS": EPOCHS,
     "VOCAB_SIZE": vocab_size,
+    "KEY_DIM": KEY_DIM,
+    "VALUE_DIM": VALUE_DIM,
     "NUM_TRAIN_IMG": NUM_TRAIN_IMG,
     "NUM_VALID_IMG": NUM_VALID_IMG,
     "NUM_TEST_IMG": len(test_data),
@@ -124,7 +128,13 @@ test_dataset = make_dataset(
 cnn_model = get_cnn_model(CNN_MODEL)
 
 # get encoder model
-encoder = Encoder(embed_dim=EMBED_DIM, ff_dim=FF_DIM, num_heads=NUM_HEADS)
+encoder = Encoder(
+    embed_dim=EMBED_DIM,
+    ff_dim=FF_DIM,
+    num_heads=NUM_HEADS,
+    key_dim=KEY_DIM,
+    value_dim=VALUE_DIM,
+)
 
 # get decoder model
 decoder = Decoder(
@@ -132,6 +142,8 @@ decoder = Decoder(
     ff_dim=FF_DIM,
     num_heads=NUM_HEADS,
     vocab_size=vocab_size,
+    key_dim=KEY_DIM,
+    value_dim=VALUE_DIM,
 )
 
 # get final model

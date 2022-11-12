@@ -10,6 +10,7 @@ from models import (
     ImageCaptioningModel,
 )
 
+
 def get_inference_model(model_config_path):
     with open(model_config_path) as json_file:
         model_config = json.load(json_file)
@@ -19,15 +20,25 @@ def get_inference_model(model_config_path):
     NUM_HEADS = model_config["NUM_HEADS"]
     VOCAB_SIZE = model_config["VOCAB_SIZE"]
     CNN_MODEL = model_config["CNN_MODEL"]
+    VALUE_DIM = model_config["VALUE_DIM"]
+    KEY_DIM = model_config["KEY_DIM"]
 
     # get model
     cnn_model = get_cnn_model(CNN_MODEL)
-    encoder = Encoder(embed_dim=EMBED_DIM, ff_dim=FF_DIM, num_heads=NUM_HEADS)
+    encoder = Encoder(
+        embed_dim=EMBED_DIM,
+        ff_dim=FF_DIM,
+        num_heads=NUM_HEADS,
+        key_dim=KEY_DIM,
+        value=VALUE_DIM,
+    )
     decoder = Decoder(
         embed_dim=EMBED_DIM,
         num_heads=NUM_HEADS,
         ff_dim=FF_DIM,
         vocab_size=VOCAB_SIZE,
+        key_dim=KEY_DIM,
+        VALUE_DIM=VALUE_DIM,
     )
     caption_model = ImageCaptioningModel(
         cnn_model=cnn_model, encoder=encoder, decoder=decoder
@@ -74,6 +85,7 @@ def generate_caption(image_path, caption_model, tokenizer, SEQ_LENGTH):
         decoded_caption += " " + sampled_token
 
     return decoded_caption.replace("<start> ", "")
+
 
 def save_tokenizer(tokenizer, path_save):
     input = tf.keras.layers.Input(shape=(1,), dtype=tf.string)
