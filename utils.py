@@ -3,12 +3,7 @@ import numpy as np
 import json
 from datasets import read_image_inf
 from settings_train import IMAGE_SIZE
-from models import (
-    get_cnn_model,
-    Decoder,
-    Encoder,
-    ImageCaptioningModel,
-)
+from models import ImageCaptioningModel
 
 
 def get_inference_model(model_config_path):
@@ -22,26 +17,19 @@ def get_inference_model(model_config_path):
     CNN_MODEL = model_config["CNN_MODEL"]
     VALUE_DIM = model_config["VALUE_DIM"]
     KEY_DIM = model_config["KEY_DIM"]
+    SEQ_LENGTH = model_config["SEQ_LENGTH"]
+    VOCAB_SIZE = model_config["VOCAB_SIZE"]
 
     # get model
-    cnn_model = get_cnn_model(CNN_MODEL)
-    encoder = Encoder(
+    model = ImageCaptioningModel(
+        cnn_model=CNN_MODEL,
         embed_dim=EMBED_DIM,
         ff_dim=FF_DIM,
         num_heads=NUM_HEADS,
         key_dim=KEY_DIM,
-        value=VALUE_DIM,
-    )
-    decoder = Decoder(
-        embed_dim=EMBED_DIM,
-        num_heads=NUM_HEADS,
-        ff_dim=FF_DIM,
+        value_dim=VALUE_DIM,
+        seq_length=SEQ_LENGTH,
         vocab_size=VOCAB_SIZE,
-        key_dim=KEY_DIM,
-        VALUE_DIM=VALUE_DIM,
-    )
-    caption_model = ImageCaptioningModel(
-        cnn_model=cnn_model, encoder=encoder, decoder=decoder
     )
 
     # get cnn input
@@ -52,11 +40,11 @@ def get_inference_model(model_config_path):
 
     # get decoder input
     decoder_input = tf.keras.layers.Input(shape=(None,))
-    caption_model([cnn_input, training, decoder_input])
-    return caption_model
+    model([cnn_input, training, decoder_input])
+    return model
 
 
-def generate_caption(image_path, caption_model, tokenizer, SEQ_LENGTH):
+def generate_caption(image_path, model, tokenizer, SEQ_LENGTH):
     vocab = tokenizer.get_vocabulary()
     index_lookup = dict(zip(range(len(vocab)), vocab))
     max_decoded_sentence_length = SEQ_LENGTH - 1
@@ -65,17 +53,17 @@ def generate_caption(image_path, caption_model, tokenizer, SEQ_LENGTH):
     img = read_image_inf(image_path)
 
     # pass the image to the CNN model
-    img = caption_model.cnn_model(img)
+    img = model.cnn_model(img)
 
     # pass the image features to the encoder
-    encoded_img = caption_model.encoder(img, training=False)
+    encoded_img = model.encoder(img, training=False)
 
     # generate the caption using the decoder
     decoded_caption = "<start>"
     for i in range(max_decoded_sentence_length):
         tokenized_caption = tokenizer([decoded_caption])[:, :-1]
         mask = tf.math.not_equal(tokenized_caption, 0)
-        predictions = caption_model.decoder(
+        predictions = model.decoder(
             tokenized_caption, encoded_img, training=False, mask=mask
         )
         sampled_token_index = np.argmax(predictions[0, i, :])

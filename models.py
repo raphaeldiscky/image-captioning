@@ -93,7 +93,15 @@ class Encoder(Layer):
 
 class Decoder(Layer):
     def __init__(
-        self, embed_dim, ff_dim, num_heads, vocab_size, key_dim, value_dim, **kwargs
+        self,
+        embed_dim,
+        ff_dim,
+        num_heads,
+        vocab_size,
+        key_dim,
+        value_dim,
+        seq_length,
+        **kwargs
     ):
         super().__init__(**kwargs)
         self.embed_dim = embed_dim
@@ -102,6 +110,7 @@ class Decoder(Layer):
         self.vocab_size = vocab_size
         self.key_dim = key_dim
         self.value_dim = value_dim
+        self.seq_length = seq_length
         self.multihead_attention_1 = MultiHeadAttention(
             num_heads=num_heads, key_dim=key_dim, value_dim=value_dim
         )
@@ -113,7 +122,9 @@ class Decoder(Layer):
         self.add_norm2 = AddNormalization()
         self.add_norm3 = AddNormalization()
         self.pos_encoding = PositionalEmbedding(
-            embed_dim=EMBED_DIM, sequence_length=SEQ_LENGTH, vocab_size=self.vocab_size
+            embed_dim=self.embed_dim,
+            sequence_length=self.seq_length,
+            vocab_size=self.vocab_size,
         )
         self.dropout_1 = Dropout(0.1)
         self.dropout_2 = Dropout(0.1)
@@ -171,7 +182,15 @@ class Decoder(Layer):
 
 class ImageCaptioningModel(keras.Model):
     def __init__(
-        self, cnn_model, embed_dim, ff_dim, num_heads, key_dim, value_dim, vocab_size
+        self,
+        cnn_model,
+        embed_dim,
+        ff_dim,
+        num_heads,
+        key_dim,
+        value_dim,
+        seq_length,
+        vocab_size,
     ):
         super().__init__()
         self.cnn_model = get_cnn_model(cnn_model)
@@ -180,6 +199,7 @@ class ImageCaptioningModel(keras.Model):
         self.num_heads = num_heads
         self.key_dim = key_dim
         self.value_dim = value_dim
+        self.seq_length = seq_length
         self.vocab_size = vocab_size
         self.loss_tracker = keras.metrics.Mean(name="loss")
         self.acc_tracker = keras.metrics.Mean(name="accuracy")
@@ -192,21 +212,14 @@ class ImageCaptioningModel(keras.Model):
             value_dim,
         )
         self.decoder = Decoder(
-            embed_dim,
-            ff_dim,
-            num_heads,
-            vocab_size,
-            key_dim,
-            value_dim,
+            embed_dim, ff_dim, num_heads, vocab_size, key_dim, value_dim, seq_length
         )
 
     def call(self, inputs):
         enc_inputs = self.cnn_model(inputs[0])
-        enc_outputs = self.encoder(enc_inputs, False)
-        dec_outputs = self.decoder(
-            inputs[2], enc_outputs, training=inputs[1], mask=None
-        )
-        return dec_outputs
+        enc_output = self.encoder(enc_inputs, False)
+        dec_output = self.decoder(inputs[2], enc_output, training=inputs[1], mask=None)
+        return dec_output
 
     def calculate_loss(self, y_true, y_pred, mask):
         loss = self.loss(y_true, y_pred)

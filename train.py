@@ -38,9 +38,6 @@ from datasets import (
 from custom_schedule import custom_schedule
 from utils import save_tokenizer
 from models import (
-    get_cnn_model,
-    Decoder,
-    Encoder,
     ImageCaptioningModel,
 )
 
@@ -124,29 +121,7 @@ test_dataset = make_dataset(
     tokenizer=tokenizer,
 )
 
-# get cnn model
-# cnn_model = get_cnn_model(CNN_MODEL)
-
-# # get encoder model
-# encoder = Encoder(
-#     embed_dim=EMBED_DIM,
-#     ff_dim=FF_DIM,
-#     num_heads=NUM_HEADS,
-#     key_dim=KEY_DIM,
-#     value_dim=VALUE_DIM,
-# )
-
-# # get decoder model
-# decoder = Decoder(
-#     embed_dim=EMBED_DIM,
-#     ff_dim=FF_DIM,
-#     num_heads=NUM_HEADS,
-#     vocab_size=vocab_size,
-#     key_dim=KEY_DIM,
-#     value_dim=VALUE_DIM,
-# )
-
-# get final model
+# get model
 model = ImageCaptioningModel(
     cnn_model=CNN_MODEL,
     embed_dim=EMBED_DIM,
@@ -154,7 +129,8 @@ model = ImageCaptioningModel(
     num_heads=NUM_HEADS,
     key_dim=KEY_DIM,
     value_dim=VALUE_DIM,
-    vocab_size=vocab_size
+    seq_length=SEQ_LENGTH,
+    vocab_size=vocab_size,
 )
 
 # define the loss function
