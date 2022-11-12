@@ -34,5 +34,5 @@ text_caption = generate_caption(
     image_path, model, tokenizer, model_config["SEQ_LENGTH"]
 )
 
-print("PREDICTING_WITH_MODEL: ", MODEL_WEIGHT_PATH)
+print("\n\nPREDICTING_WITH_MODEL: ", MODEL_WEIGHT_PATH)
 print("PREDICT CAPTION : %s" % (text_caption))

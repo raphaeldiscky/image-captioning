@@ -3,9 +3,9 @@ from datetime import datetime
 DATE_NOW = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
 
 # CNN model choose between "efficientnet" or "resnet"
-CNN_MODEL = "resnet"
+CNN_MODEL = "efficientnet"
 # early stopping
-EARLY_STOPPING = True
+EARLY_STOPPING = False
 # desired image dimensions
 IMAGE_SIZE = (256, 256)
 # max vocabulary size
@@ -15,7 +15,7 @@ SEQ_LENGTH = 25
 # dimension for the image embeddings and token embeddings
 EMBED_DIM = 512
 # number of self-attention heads
-NUM_HEADS = 2
+NUM_HEADS = 6
 # per-layer units in the feed-forward network
 FF_DIM = 2048
 # shuffle dataset dim on tf.data.Dataset
@@ -23,10 +23,10 @@ SHUFFLE_DIM = 512
 # batch size
 BATCH_SIZE = 64
 # numbers of training epochs
-EPOCHS = 20
+EPOCHS = 12
 
 
-# Using karpathy's
+# USING KARPATHY SPLIT
 # train = 113287
 # val = 5000
 # test = 5000 (remainder)
@@ -44,7 +44,7 @@ VALID_SET_AUG = False
 # for Indonesian dataset
 train_data_json_path = "datasets/karpathy_train2014_indo.json"  # 113287 data
 valid_data_json_path = "datasets/karpathy_valtest2014_indo.json"  # 10000 data
-text_data_json_path = "datasets/text_data_indo.json"
+sentence_data_json_path = "datasets/sentence_data_indo.json"  # list of sentences
 
 # save training files directory
 SAVE_DIR = "save_trains/"

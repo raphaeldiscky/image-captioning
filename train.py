@@ -1,7 +1,9 @@
 import os
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-
+import json
+from tensorflow import keras
+from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
 from settings_train import (
     BATCH_SIZE,
     CNN_MODEL,
@@ -18,7 +20,7 @@ from settings_train import (
     VALID_SET_AUG,
     train_data_json_path,
     valid_data_json_path,
-    text_data_json_path,
+    sentence_data_json_path,
     REDUCE_DATASET,
     MAX_VOCAB_SIZE,
     SEQ_LENGTH,
@@ -32,51 +34,47 @@ from datasets import (
     valid_test_split,
 )
 from custom_schedule import custom_schedule
+from utils import save_tokenizer
 from models import (
     get_cnn_model,
     Decoder,
     Encoder,
     ImageCaptioningModel,
 )
-from utils import save_tokenizer
-import json
-from tensorflow import keras
-from tensorflow.keras.layers.experimental.preprocessing import TextVectorization
 
 # load dataset
 with open(train_data_json_path) as json_file:
     train_data = json.load(json_file)
 with open(valid_data_json_path) as json_file:
     valid_data = json.load(json_file)
-with open(text_data_json_path) as json_file:
-    text_data = json.load(json_file)
+with open(sentence_data_json_path) as json_file:
+    sentence_data = json.load(json_file)
 
 # for reduce number of images in the dataset
 if REDUCE_DATASET:
     train_data, valid_data = reduce_dataset_dim(train_data, valid_data)
 
-print("Number of training samples: ", len(train_data))
+print("\n\nNumber of training samples: ", len(train_data))
 print("Number of validation samples: ", len(valid_data))
 
-# define tokeziner / vectorize layer
+# define tokeziner / vectorized layer
 tokenizer = TextVectorization(
-    max_tokens=MAX_VOCAB_SIZE,
     output_mode="int",
     output_sequence_length=SEQ_LENGTH,
+    max_tokens=MAX_VOCAB_SIZE,
     standardize=custom_standardization,
 )
 
 # adapt tokenizer to create the vocabulary
-tokenizer.adapt(text_data)
+tokenizer.adapt(sentence_data)
 
 # define vocabulary size of the vocabulary
-VOCAB_SIZE = len(tokenizer.get_vocabulary())
-
-print("Vocab size: ", VOCAB_SIZE)
+vocab_size = len(tokenizer.get_vocabulary())
 
 # split dataset to valid and test set
 valid_data, test_data = valid_test_split(valid_data)
 
+print("\n\nVocab size: ", vocab_size)
 print("Validation data after splitting with test set: ", len(valid_data))
 print("Test data: ", len(test_data))
 
@@ -92,7 +90,7 @@ config_train = {
     "SHUFFLE_DIM": SHUFFLE_DIM,
     "BATCH_SIZE": BATCH_SIZE,
     "EPOCHS": EPOCHS,
-    "VOCAB_SIZE": VOCAB_SIZE,
+    "VOCAB_SIZE": vocab_size,
     "NUM_TRAIN_IMG": NUM_TRAIN_IMG,
     "NUM_VALID_IMG": NUM_VALID_IMG,
     "NUM_TEST_IMG": len(test_data),
@@ -102,8 +100,8 @@ print(config_train)
 
 # setting batch dataset
 train_dataset = make_dataset(
-    list(train_data.keys()),  # path to images
-    list(train_data.values()),  # captions
+    list(train_data.keys()),  # key: path to images
+    list(train_data.values()),  # value: list of captions
     data_aug=TRAIN_SET_AUG,
     tokenizer=tokenizer,
 )
@@ -122,18 +120,21 @@ test_dataset = make_dataset(
     tokenizer=tokenizer,
 )
 
-# get model
+# get cnn model
 cnn_model = get_cnn_model(CNN_MODEL)
 
-encoder = Encoder(embed_dim=EMBED_DIM, num_heads=NUM_HEADS, ff_dim=FF_DIM)
+# get encoder model
+encoder = Encoder(embed_dim=EMBED_DIM, ff_dim=FF_DIM, num_heads=NUM_HEADS)
 
+# get decoder model
 decoder = Decoder(
     embed_dim=EMBED_DIM,
     ff_dim=FF_DIM,
     num_heads=NUM_HEADS,
-    vocab_size=VOCAB_SIZE,
+    vocab_size=vocab_size,
 )
 
+# get final model
 caption_model = ImageCaptioningModel(
     cnn_model=cnn_model, encoder=encoder, decoder=decoder
 )
@@ -165,7 +166,6 @@ history = caption_model.fit(
     callbacks=[early_stopping] if EARLY_STOPPING else None,
 )
 
-
 # compute definitive metrics on train/valid/test set
 train_metrics = caption_model.evaluate(train_dataset, batch_size=BATCH_SIZE)
 valid_metrics = caption_model.evaluate(valid_dataset, batch_size=BATCH_SIZE)
@@ -179,11 +179,10 @@ os.mkdir(NEW_DIR)
 history_dict = history.history
 json.dump(history_dict, open(SAVE_DIR + "{}/history.json".format(DATE_NOW), "w"))
 
-
 # save weights model
 caption_model.save_weights(SAVE_DIR + "{}/model_weights_coco.h5".format(DATE_NOW))
 
-# save metrics results
+# print metric results
 metrics_results = {
     "TRAIN_SET": "Train Loss = %.4f - Train Accuracy = %.4f"
     % (train_metrics[0], train_metrics[1]),
@@ -194,6 +193,7 @@ metrics_results = {
 }
 print(metrics_results)
 
+# save metric results
 json.dump(
     metrics_results, open(SAVE_DIR + "{}/metrics_results.json".format(DATE_NOW), "w")
 )

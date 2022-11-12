@@ -1,4 +1,7 @@
 import tensorflow as tf
+import numpy as np
+import json
+from datasets import read_image_inf
 from settings_train import IMAGE_SIZE
 from models import (
     get_cnn_model,
@@ -6,17 +9,6 @@ from models import (
     Encoder,
     ImageCaptioningModel,
 )
-from datasets import read_image_inf
-import numpy as np
-import json
-
-
-def save_tokenizer(tokenizer, path_save):
-    input = tf.keras.layers.Input(shape=(1,), dtype=tf.string)
-    output = tokenizer(input)
-    model = tf.keras.Model(input, output)
-    model.save(path_save + "/tokenizer", save_format="tf")
-
 
 def get_inference_model(model_config_path):
     with open(model_config_path) as json_file:
@@ -28,9 +20,9 @@ def get_inference_model(model_config_path):
     VOCAB_SIZE = model_config["VOCAB_SIZE"]
     CNN_MODEL = model_config["CNN_MODEL"]
 
+    # get model
     cnn_model = get_cnn_model(CNN_MODEL)
-    encoder = Encoder(embed_dim=EMBED_DIM, num_heads=NUM_HEADS, ff_dim=FF_DIM)
-
+    encoder = Encoder(embed_dim=EMBED_DIM, ff_dim=FF_DIM, num_heads=NUM_HEADS)
     decoder = Decoder(
         embed_dim=EMBED_DIM,
         num_heads=NUM_HEADS,
@@ -41,11 +33,15 @@ def get_inference_model(model_config_path):
         cnn_model=cnn_model, encoder=encoder, decoder=decoder
     )
 
+    # get cnn input
     cnn_input = tf.keras.layers.Input(shape=(IMAGE_SIZE[0], IMAGE_SIZE[1], 3))
+
+    # set training to False
     training = False
+
+    # get decoder input
     decoder_input = tf.keras.layers.Input(shape=(None,))
     caption_model([cnn_input, training, decoder_input])
-
     return caption_model
 
 
@@ -78,3 +74,9 @@ def generate_caption(image_path, caption_model, tokenizer, SEQ_LENGTH):
         decoded_caption += " " + sampled_token
 
     return decoded_caption.replace("<start> ", "")
+
+def save_tokenizer(tokenizer, path_save):
+    input = tf.keras.layers.Input(shape=(1,), dtype=tf.string)
+    output = tokenizer(input)
+    model = tf.keras.Model(input, output)
+    model.save(path_save + "/tokenizer", save_format="tf")

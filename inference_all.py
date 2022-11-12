@@ -1,7 +1,8 @@
-from utils import get_inference_model, generate_caption
 import json
 import os
+from itertools import islice
 import tensorflow as tf
+from utils import get_inference_model, generate_caption
 from settings_inference import (
     DATE_TO_INFERENCE,
     TOKENIZER_PATH,
@@ -10,7 +11,7 @@ from settings_inference import (
     DATASET_TO_INFERENCE,
     SAVE_DIR,
 )
-from itertools import islice
+
 
 print("\n\nINFERENCE ALL: {}\n\n".format(DATE_TO_INFERENCE))
 
@@ -35,6 +36,7 @@ with open("datasets/karpathy_valtest2014_indo.json") as karpathy_valtest2014_ind
 # looping through val or test dataset
 iteration = 1
 if DATASET_TO_INFERENCE == "test":
+    # start from index 5000
     for key, value in islice(data.items(), 5000, len(data)):
         dict = {}
         image_path = key
@@ -51,6 +53,7 @@ if DATASET_TO_INFERENCE == "test":
         iteration += 1
         list.append(dict)
 elif DATASET_TO_INFERENCE == "val":
+    # start from index 0 to 5000
     for key, value in islice(data.items(), 0, 5000):
         dict = {}
         image_path = key

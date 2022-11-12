@@ -110,11 +110,12 @@ img_transform = tf.keras.Sequential(
 
 
 def make_dataset(images, list_of_list_captions, data_aug, tokenizer):
-    read_image_xx = read_image(data_aug)
+    read_image_output = read_image(data_aug)
     img_dataset = tf.data.Dataset.from_tensor_slices(images)
 
-    img_dataset = img_dataset.map(read_image_xx, num_parallel_calls=AUTOTUNE)
+    img_dataset = img_dataset.map(read_image_output, num_parallel_calls=AUTOTUNE)
 
+    # add token <start> and <end>
     list_of_list_captions_with_token = add_token(list_of_list_captions)
 
     cap_dataset = tf.data.Dataset.from_tensor_slices(
