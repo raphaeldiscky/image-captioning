@@ -171,19 +171,34 @@ class Decoder(Layer):
 
 class ImageCaptioningModel(keras.Model):
     def __init__(
-        self,
-        cnn_model,
-        encoder,
-        decoder,
-        num_captions_per_image=5,
+        self, cnn_model, embed_dim, ff_dim, num_heads, key_dim, value_dim, vocab_size
     ):
         super().__init__()
-        self.cnn_model = cnn_model
-        self.encoder = encoder
-        self.decoder = decoder
+        self.cnn_model = get_cnn_model(cnn_model)
+        self.embed_dim = embed_dim
+        self.ff_dim = ff_dim
+        self.num_heads = num_heads
+        self.key_dim = key_dim
+        self.value_dim = value_dim
+        self.vocab_size = vocab_size
         self.loss_tracker = keras.metrics.Mean(name="loss")
         self.acc_tracker = keras.metrics.Mean(name="accuracy")
-        self.num_captions_per_image = num_captions_per_image
+        self.num_captions_per_image = 5
+        self.encoder = Encoder(
+            embed_dim,
+            ff_dim,
+            num_heads,
+            key_dim,
+            value_dim,
+        )
+        self.decoder = Decoder(
+            embed_dim,
+            ff_dim,
+            num_heads,
+            vocab_size,
+            key_dim,
+            value_dim,
+        )
 
     def call(self, inputs):
         enc_inputs = self.cnn_model(inputs[0])

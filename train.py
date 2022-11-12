@@ -125,30 +125,36 @@ test_dataset = make_dataset(
 )
 
 # get cnn model
-cnn_model = get_cnn_model(CNN_MODEL)
+# cnn_model = get_cnn_model(CNN_MODEL)
 
-# get encoder model
-encoder = Encoder(
-    embed_dim=EMBED_DIM,
-    ff_dim=FF_DIM,
-    num_heads=NUM_HEADS,
-    key_dim=KEY_DIM,
-    value_dim=VALUE_DIM,
-)
+# # get encoder model
+# encoder = Encoder(
+#     embed_dim=EMBED_DIM,
+#     ff_dim=FF_DIM,
+#     num_heads=NUM_HEADS,
+#     key_dim=KEY_DIM,
+#     value_dim=VALUE_DIM,
+# )
 
-# get decoder model
-decoder = Decoder(
-    embed_dim=EMBED_DIM,
-    ff_dim=FF_DIM,
-    num_heads=NUM_HEADS,
-    vocab_size=vocab_size,
-    key_dim=KEY_DIM,
-    value_dim=VALUE_DIM,
-)
+# # get decoder model
+# decoder = Decoder(
+#     embed_dim=EMBED_DIM,
+#     ff_dim=FF_DIM,
+#     num_heads=NUM_HEADS,
+#     vocab_size=vocab_size,
+#     key_dim=KEY_DIM,
+#     value_dim=VALUE_DIM,
+# )
 
 # get final model
-caption_model = ImageCaptioningModel(
-    cnn_model=cnn_model, encoder=encoder, decoder=decoder
+model = ImageCaptioningModel(
+    cnn_model=CNN_MODEL,
+    embed_dim=EMBED_DIM,
+    ff_dim=FF_DIM,
+    num_heads=NUM_HEADS,
+    key_dim=KEY_DIM,
+    value_dim=VALUE_DIM,
+    vocab_size=vocab_size
 )
 
 # define the loss function
@@ -168,10 +174,10 @@ optimizer = keras.optimizers.Adam(
 )
 
 # compile the model
-caption_model.compile(optimizer=optimizer, loss=cross_entropy)
+model.compile(optimizer=optimizer, loss=cross_entropy)
 
 # fit the model
-history = caption_model.fit(
+history = model.fit(
     train_dataset,
     epochs=EPOCHS,
     validation_data=valid_dataset,
@@ -179,9 +185,9 @@ history = caption_model.fit(
 )
 
 # compute definitive metrics on train/valid/test set
-train_metrics = caption_model.evaluate(train_dataset, batch_size=BATCH_SIZE)
-valid_metrics = caption_model.evaluate(valid_dataset, batch_size=BATCH_SIZE)
-test_metrics = caption_model.evaluate(test_dataset, batch_size=BATCH_SIZE)
+train_metrics = model.evaluate(train_dataset, batch_size=BATCH_SIZE)
+valid_metrics = model.evaluate(valid_dataset, batch_size=BATCH_SIZE)
+test_metrics = model.evaluate(test_dataset, batch_size=BATCH_SIZE)
 
 # create new directory for saving model
 NEW_DIR = SAVE_DIR + DATE_NOW
@@ -192,7 +198,7 @@ history_dict = history.history
 json.dump(history_dict, open(SAVE_DIR + "{}/history.json".format(DATE_NOW), "w"))
 
 # save weights model
-caption_model.save_weights(SAVE_DIR + "{}/model_weights_coco.h5".format(DATE_NOW))
+model.save_weights(SAVE_DIR + "{}/model_weights_coco.h5".format(DATE_NOW))
 
 # print metric results
 metrics_results = {
