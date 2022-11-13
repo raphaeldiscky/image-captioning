@@ -11,7 +11,7 @@ from datasets import custom_standardization
 # input: list of sentences
 output_sequence_length = 6
 vocab_size = 20
-sentences = ["<start> saya adalah robot <end>", "<start> kamu juga robot <end>"]
+sentences = ["<start> saya adalah robot. <end>", "<start> kamu juga robot. <end>"]
 
 # TEXT VECTORIZATION LAYER
 sentence_data = Dataset.from_tensor_slices(sentences)
@@ -25,6 +25,7 @@ vectorize_layer = TextVectorization(
 
 # train the layer to create a dictionary of words and replaces each word it its corresponding index in the dictionary
 vectorize_layer.adapt(sentence_data)
+
 # convert all sentences to tensors
 word_tensors = convert_to_tensor(sentences, dtype=tf.string)
 # use the word tensors to get vectorized phrases

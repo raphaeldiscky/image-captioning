@@ -49,7 +49,7 @@ with open(valid_data_json_path) as json_file:
 with open(captions_data_json_path) as json_file:
     captions_data = json.load(json_file)
 
-# for reduce number of images in the dataset
+# for reduce number of images in the dataset (default = False)
 if REDUCE_DATASET:
     train_data, valid_data = reduce_dataset_dim(train_data, valid_data)
 

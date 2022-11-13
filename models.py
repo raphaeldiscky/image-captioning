@@ -216,8 +216,8 @@ class ImageCaptioningModel(keras.Model):
         )
 
     def call(self, inputs):
-        enc_inputs = self.cnn_model(inputs[0])
-        enc_output = self.encoder(enc_inputs, False)
+        enc_input = self.cnn_model(inputs[0])
+        enc_output = self.encoder(enc_input, False)
         dec_output = self.decoder(inputs[2], enc_output, training=inputs[1], mask=None)
         return dec_output
 
