@@ -32,7 +32,7 @@ from settings_train import (
 from datasets import (
     make_dataset,
     custom_standardization,
-    reduce_dataset_dim,
+    reduce_dataset,
     valid_test_split,
 )
 from custom_schedule import custom_schedule
@@ -51,17 +51,17 @@ with open(captions_data_json_path) as json_file:
 
 # for reduce number of images in the dataset (default = False)
 if REDUCE_DATASET:
-    train_data, valid_data = reduce_dataset_dim(train_data, valid_data)
+    train_data, valid_data = reduce_dataset(train_data, valid_data)
 
 print("\n\nNumber of training samples: ", len(train_data))
 print("Number of validation samples: ", len(valid_data))
 
 # define tokeziner / vectorized layer
 tokenizer = TextVectorization(
-    output_mode="int",
+    standardize=custom_standardization,
     output_sequence_length=SEQ_LENGTH,
     max_tokens=MAX_VOCAB_SIZE,
-    standardize=custom_standardization,
+    output_mode="int",
 )
 
 # adapt tokenizer to create the vocabulary
@@ -132,6 +132,7 @@ model = ImageCaptioningModel(
     seq_length=SEQ_LENGTH,
     vocab_size=vocab_size,
 )
+
 
 # define the loss function
 cross_entropy = keras.losses.SparseCategoricalCrossentropy(

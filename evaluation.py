@@ -55,6 +55,7 @@ results.append(
         "EPOCH": len(history["acc"]),
         "CNN_MODEL": config_train["CNN_MODEL"],
         "NUM_HEADS": config_train["NUM_HEADS"],
+        "EMBED_DIM": config_train["EMBED_DIM"],
     }
 )
 

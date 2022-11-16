@@ -8,6 +8,7 @@ from tensorflow.keras.layers import (
     ReLU,
     Dropout,
     MultiHeadAttention,
+    Input,
 )
 from tensorflow import keras
 from tensorflow.keras.applications import efficientnet, resnet
@@ -24,6 +25,7 @@ def get_cnn_model(selected_cnn_model):
         base_model_out = base_model.output
         base_model_out = Reshape((-1, 1280))(base_model_out)
         cnn_model = keras.models.Model(base_model.input, base_model_out)
+        # cnn_model.summary()
     elif selected_cnn_model == "resnet":
         base_model = resnet.ResNet101(
             include_top=False, weights="imagenet", input_shape=(*IMAGE_SIZE, 3)
@@ -33,6 +35,7 @@ def get_cnn_model(selected_cnn_model):
         base_model_out = base_model.output
         base_model_out = Reshape((-1, 2048))(base_model_out)
         cnn_model = keras.models.Model(base_model.input, base_model_out)
+        # cnn_model.summary()
     return cnn_model
 
 
@@ -64,11 +67,14 @@ class Encoder(Layer):
         self.embed_dim = embed_dim
         self.ff_dim = ff_dim
         self.num_heads = num_heads
-        self.key_dim = key_dim
-        self.value_dim = value_dim
+        self.key_dim = key_dim  # key_dim = dimension of key for each head
+        self.value_dim = value_dim  # value_dim = embed_dim / num_head
         self.dense = Dense(embed_dim, activation="relu")
         self.multihead_attention = MultiHeadAttention(
-            num_heads=num_heads, key_dim=key_dim, value_dim=value_dim
+            num_heads=num_heads,
+            key_dim=key_dim,
+            value_dim=value_dim,
+            output_shape=embed_dim,
         )
         self.dropout_1 = Dropout(0.1)
         self.add_norm1 = AddNormalization()
@@ -84,10 +90,12 @@ class Encoder(Layer):
         multihead_attention_output = self.dropout_1(
             multihead_attention_output, training
         )
+
         addnorm_output = self.add_norm1(inputs, multihead_attention_output)
         feed_forward_output = self.feed_forward(addnorm_output)
         feed_forward_output = self.dropout_2(feed_forward_output, training)
         enc_output = self.add_norm2(addnorm_output, feed_forward_output)
+
         return enc_output
 
 
@@ -112,10 +120,16 @@ class Decoder(Layer):
         self.value_dim = value_dim
         self.seq_length = seq_length
         self.multihead_attention_1 = MultiHeadAttention(
-            num_heads=num_heads, key_dim=key_dim, value_dim=value_dim
+            num_heads=num_heads,
+            key_dim=key_dim,
+            value_dim=value_dim,
+            output_shape=embed_dim,
         )
         self.multihead_attention_2 = MultiHeadAttention(
-            num_heads=num_heads, key_dim=key_dim, value_dim=value_dim
+            num_heads=num_heads,
+            key_dim=key_dim,
+            value_dim=value_dim,
+            output_shape=embed_dim,
         )
         self.feed_forward = FeedForward(embed_dim, ff_dim)
         self.add_norm1 = AddNormalization()
@@ -217,8 +231,11 @@ class ImageCaptioningModel(keras.Model):
 
     def call(self, inputs):
         enc_input = self.cnn_model(inputs[0])
+        print("\nENC_INPUT", enc_input)
         enc_output = self.encoder(enc_input, False)
+        print("\nENC_OUTPUT", enc_output)
         dec_output = self.decoder(inputs[2], enc_output, training=inputs[1], mask=None)
+        print("\nDEC_OUTPPUT", dec_output)
         return dec_output
 
     def calculate_loss(self, y_true, y_pred, mask):

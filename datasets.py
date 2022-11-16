@@ -1,5 +1,4 @@
 import re
-import numpy as np
 import tensorflow as tf
 from settings_train import (
     BATCH_SIZE,
@@ -47,20 +46,20 @@ def read_image_inf(img_path):
     img = tf.io.read_file(img_path)
     img = tf.image.decode_jpeg(img, channels=3)
     img = tf.image.resize(img, IMAGE_SIZE)
-    img = tf.image.convert_image_dtype(img, tf.float32)
+    img = tf.image.convert_image_dtype(img, tf.float32) / 255.0
     img = tf.expand_dims(img, axis=0)
     return img
 
 
 def read_image(data_aug):
-    def decode_image(img_path):
+    def preprocess_image(img_path):
         img = tf.io.read_file(img_path)
         img = tf.image.decode_jpeg(img, channels=3)
         img = tf.image.resize(img, IMAGE_SIZE)
 
         if data_aug:
             img = augment(img)
-        img = tf.image.convert_image_dtype(img, tf.float32)
+        img = tf.image.convert_image_dtype(img, tf.float32) / 255.0
         return img
 
     def augment(img):
@@ -69,7 +68,7 @@ def read_image(data_aug):
         img = tf.squeeze(img, axis=0)
         return img
 
-    return decode_image
+    return preprocess_image
 
 
 transform = tf.keras.Sequential(
@@ -89,22 +88,18 @@ transform = tf.keras.Sequential(
 def make_dataset(images, captions, data_aug, tokenizer):
     read_image_output = read_image(data_aug)
     images_dataset = tf.data.Dataset.from_tensor_slices(images)
-
     images_dataset = images_dataset.map(read_image_output, num_parallel_calls=AUTOTUNE)
-
     # add token <start> and <end> to list of captions
     data_cap_with_token = add_token(captions)
-
     caption_dataset = tf.data.Dataset.from_tensor_slices(data_cap_with_token).map(
         tokenizer, num_parallel_calls=AUTOTUNE
     )
-
     dataset = tf.data.Dataset.zip((images_dataset, caption_dataset))
     dataset = dataset.batch(BATCH_SIZE).shuffle(SHUFFLE_DIM).prefetch(AUTOTUNE)
     return dataset
 
 
-def reduce_dataset_dim(captions_mapping_train, captions_mapping_valid):
+def reduce_dataset(captions_mapping_train, captions_mapping_valid):
     train_data = {}
     count_train = 0
     for id in captions_mapping_train:

@@ -13,7 +13,7 @@ MAX_VOCAB_SIZE = 20000
 # fixed length allowed for any sequence
 SEQ_LENGTH = 25
 # dimension for the image embeddings and token embeddings
-EMBED_DIM = 512
+EMBED_DIM = 1024
 # number of self-attention heads
 NUM_HEADS = 6
 # per-layer units in the feed-forward network
@@ -23,7 +23,7 @@ SHUFFLE_DIM = 512
 # batch size
 BATCH_SIZE = 64
 # numbers of training epochs
-EPOCHS = 1
+EPOCHS = 12
 # dimesion of the linearly projected queries and keys
 KEY_DIM = 64
 # dimension of the linearly projected values
