@@ -15,16 +15,16 @@ from settings_train import (
     NUM_HEADS,
     NUM_TRAIN_IMG,
     NUM_VALID_IMG,
+    TRAIN_SET_AUG,
+    VALID_SET_AUG,
     SAVE_DIR,
     SHUFFLE_DIM,
-    VALID_SET_AUG,
     train_data_json_path,
     valid_data_json_path,
     captions_data_json_path,
     REDUCE_DATASET,
     MAX_VOCAB_SIZE,
     SEQ_LENGTH,
-    TRAIN_SET_AUG,
     EARLY_STOPPING,
     KEY_DIM,
     VALUE_DIM,
@@ -101,22 +101,22 @@ print(config_train)
 
 # setting batch dataset
 train_dataset = make_dataset(
-    list(train_data.keys()),  # key: path to images
-    list(train_data.values()),  # value: list of captions
+    images=list(train_data.keys()),  # key: path to images
+    captions=list(train_data.values()),  # value: list of captions
     data_aug=TRAIN_SET_AUG,
     tokenizer=tokenizer,
 )
 
 valid_dataset = make_dataset(
-    list(valid_data.keys()),
-    list(valid_data.values()),
+    images=list(valid_data.keys()),
+    captions=list(valid_data.values()),
     data_aug=VALID_SET_AUG,
     tokenizer=tokenizer,
 )
 
 test_dataset = make_dataset(
-    list(test_data.keys()),
-    list(test_data.values()),
+    images=list(test_data.keys()),
+    captions=list(test_data.values()),
     data_aug=False,
     tokenizer=tokenizer,
 )

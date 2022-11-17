@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 import json
-from datasets import read_image_inf
+from datasets import read_image_inference
 from settings_train import IMAGE_SIZE
 from models import ImageCaptioningModel
 
@@ -50,7 +50,7 @@ def generate_caption(image_path, model, tokenizer, SEQ_LENGTH):
     max_decoded_sentence_length = SEQ_LENGTH - 1
 
     # read the image from the local
-    img = read_image_inf(image_path)
+    img = read_image_inference(image_path)
 
     # pass the image to the CNN model
     img = model.cnn_model(img)

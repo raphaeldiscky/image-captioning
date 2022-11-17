@@ -42,11 +42,11 @@ def valid_test_split(captions_mapping_valid):
     return valid_data, test_data
 
 
-def read_image_inf(img_path):
+def read_image_inference(img_path):
     img = tf.io.read_file(img_path)
     img = tf.image.decode_jpeg(img, channels=3)
     img = tf.image.resize(img, IMAGE_SIZE)
-    img = tf.image.convert_image_dtype(img, tf.float32) / 255.0
+    img = tf.image.convert_image_dtype(img, tf.float32)
     img = tf.expand_dims(img, axis=0)
     return img
 
@@ -56,10 +56,9 @@ def read_image(data_aug):
         img = tf.io.read_file(img_path)
         img = tf.image.decode_jpeg(img, channels=3)
         img = tf.image.resize(img, IMAGE_SIZE)
-
         if data_aug:
             img = augment(img)
-        img = tf.image.convert_image_dtype(img, tf.float32) / 255.0
+        img = tf.image.convert_image_dtype(img, tf.float32)
         return img
 
     def augment(img):

@@ -5,26 +5,17 @@ IMAGE_SIZE = [256, 256]
 IMG_PATH = "images/1.jpg"
 
 
-def read_image(data_aug):
+def read_image():
     def preprocess_image(img_path):
         img = tf.io.read_file(img_path)
         img = tf.image.decode_jpeg(img, channels=3)
-        print("\n\nUINT8:", img)
+        print("\n\nUINT8 RESULT:", img)
         img = tf.image.resize(img, IMAGE_SIZE)
-        print("\n\nIMG RESIZE:", img)
-        print("SHAPE", tf.shape(img))
-        if data_aug:
-            img = augment(img)
-        print("\n\nAUGMENT:", img)
-        img = tf.image.convert_image_dtype(img, tf.float32) / 255.0
-        print("\n\nIMG DTYPE:", img)
-        print("SHAPE FINAL", tf.shape(img))
-        return img
-
-    def augment(img):
-        img = tf.expand_dims(img, axis=0)
+        print("\n\nIMG RESIZED:", img)
         img = transform(img)
-        img = tf.squeeze(img, axis=0)
+        print("\n\nIMG AUGMENTED:", img)
+        img = tf.image.convert_image_dtype(img, tf.float32)
+        print("\n\nIMG DTYPE RESULT:", img)
         return img
 
     return preprocess_image(IMG_PATH)
@@ -43,4 +34,4 @@ transform = tf.keras.Sequential(
     ]
 )
 
-read_image(data_aug=True)
+read_image()
