@@ -83,19 +83,25 @@ class Encoder(Layer):
         self.add_norm2 = AddNormalization()
 
     def call(self, inputs, training, mask=None):
+        print("\n\nENC INPUT:", inputs)
         inputs = self.dense(inputs)
+        print("\n\nAFTER DENSE:", inputs)
         multihead_attention_output = self.multihead_attention(
             query=inputs, value=inputs, key=inputs, attention_mask=None
         )
+        print("\n\nMHA OUTPUT:", multihead_attention_output)
         multihead_attention_output = self.dropout_1(
             multihead_attention_output, training
         )
-
+        print("\n\nMHA OUTPUT - DROPOUT:", multihead_attention_output)
         addnorm_output = self.add_norm1(inputs, multihead_attention_output)
+        print("\n\nNORM OUTPUT:", addnorm_output)
         feed_forward_output = self.feed_forward(addnorm_output)
+        print("\n\nFF OUTPUT:", feed_forward_output)
         feed_forward_output = self.dropout_2(feed_forward_output, training)
+        print("\n\nFF OUTPUT - DROPOUT:", feed_forward_output)
         enc_output = self.add_norm2(addnorm_output, feed_forward_output)
-
+        print("\n\nENC OUTPUT:", enc_output)
         return enc_output
 
 
@@ -147,9 +153,11 @@ class Decoder(Layer):
         self.supports_masking = True
 
     def call(self, inputs, encoder_outputs, training, mask=None):
+        print("\n\nDEC INPUT:", inputs)
         inputs = self.pos_encoding(inputs)
+        print("\n\nPOS ENCODING:", inputs)
         causal_mask = self.get_causal_attention_mask(inputs)
-
+        print("\n\nCAUSAL MASK:", causal_mask)
         if mask is not None:
             padding_mask = tf.cast(mask[:, :, tf.newaxis], dtype=tf.int32)
             combined_mask = tf.cast(mask[:, tf.newaxis, :], dtype=tf.int32)
@@ -161,23 +169,32 @@ class Decoder(Layer):
         multihead_output_1 = self.multihead_attention_1(
             query=inputs, value=inputs, key=inputs, attention_mask=combined_mask
         )
+        print("\n\nMHA OUT1:", multihead_output_1)
         multihead_output_1 = self.dropout_1(multihead_output_1, training=training)
+        print("\n\nMHA OUT1 - DROPOUT:", multihead_output_1)
         addnorm_output_1 = self.add_norm1(inputs, multihead_output_1)
-
+        print("\n\nADD NORM OUT1:", addnorm_output_1)
         multihead_output_2 = self.multihead_attention_2(
             query=addnorm_output_1,
             value=encoder_outputs,
             key=encoder_outputs,
             attention_mask=padding_mask,
         )
+        print("\n\nMHA OUT2:", multihead_output_2)
         multihead_output_2 = self.dropout_2(multihead_output_2, training=training)
+        print("\n\nMHA OUT2 - DROPOUT:", multihead_output_2)
         addnorm_output_2 = self.add_norm2(addnorm_output_1, multihead_output_2)
+        print("\n\nADD NORM OUT2:", addnorm_output_2)
 
         ff_output = self.feed_forward(addnorm_output_2)
+        print("\n\nFF:", ff_output)
         ff_output = self.dropout_3(ff_output, training=training)
+        print("\n\nFF - DROPOUT:", ff_output)
 
         addnorm_output_3 = self.add_norm3(addnorm_output_2, ff_output)
+        print("\n\nADD NORM OUT3:", addnorm_output_3)
         dec_output = self.dense(addnorm_output_3)
+        print("\n\nDEC OUTPUT AFTER DENSE:", dec_output)
         return dec_output
 
     def get_causal_attention_mask(self, inputs):

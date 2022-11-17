@@ -23,7 +23,7 @@ SHUFFLE_DIM = 512
 # batch size
 BATCH_SIZE = 64
 # numbers of training epochs
-EPOCHS = 1
+EPOCHS = 12
 # dimesion of the linearly projected queries and keys
 KEY_DIM = 64
 # dimension of the linearly projected values
