@@ -8,7 +8,6 @@ from tensorflow.keras.layers import (
     ReLU,
     Dropout,
     MultiHeadAttention,
-    Input,
 )
 from tensorflow import keras
 from tensorflow.keras.applications import efficientnet, resnet
@@ -20,22 +19,20 @@ def get_cnn_model(selected_cnn_model):
         base_model = efficientnet.EfficientNetB0(
             include_top=False, weights="imagenet", input_shape=(*IMAGE_SIZE, 3)
         )
-        # freeze feature extractor layers
+        # freeze the convolutional base
         base_model.trainable = False
         base_model_out = base_model.output
         base_model_out = Reshape((-1, 1280))(base_model_out)
         cnn_model = keras.models.Model(base_model.input, base_model_out)
-        # cnn_model.summary()
     elif selected_cnn_model == "resnet":
         base_model = resnet.ResNet101(
             include_top=False, weights="imagenet", input_shape=(*IMAGE_SIZE, 3)
         )
-        # freeze feature extractor layers
+        # freeze the convolutional base
         base_model.trainable = False
         base_model_out = base_model.output
         base_model_out = Reshape((-1, 2048))(base_model_out)
         cnn_model = keras.models.Model(base_model.input, base_model_out)
-        # cnn_model.summary()
     return cnn_model
 
 
@@ -82,26 +79,25 @@ class Encoder(Layer):
         self.dropout_2 = Dropout(0.1)
         self.add_norm2 = AddNormalization()
 
-    def call(self, inputs, training, mask=None):
-        print("\n\nENC INPUT:", inputs)
+    def call(self, inputs, training):
+        print("\n\n INPUTS ENC:", inputs)  # (None, 64, 1280)
         inputs = self.dense(inputs)
-        print("\n\nAFTER DENSE:", inputs)
+        print("\n\n DENSE:", inputs)  # (None, 64, 2048)
         multihead_attention_output = self.multihead_attention(
-            query=inputs, value=inputs, key=inputs, attention_mask=None
+            query=inputs, value=inputs, key=inputs
         )
-        print("\n\nMHA OUTPUT:", multihead_attention_output)
+        print("\n\n MHA:", multihead_attention_output)  # (None, 64, 2048)
         multihead_attention_output = self.dropout_1(
             multihead_attention_output, training
         )
-        print("\n\nMHA OUTPUT - DROPOUT:", multihead_attention_output)
+        print("\n\n DROP:", multihead_attention_output)
         addnorm_output = self.add_norm1(inputs, multihead_attention_output)
-        print("\n\nNORM OUTPUT:", addnorm_output)
+        print("\n\n NORM:", addnorm_output)  # (None, 64, 2048)
         feed_forward_output = self.feed_forward(addnorm_output)
-        print("\n\nFF OUTPUT:", feed_forward_output)
+        print("\n\n FF:", feed_forward_output)  # (None, 64, 2048)
         feed_forward_output = self.dropout_2(feed_forward_output, training)
-        print("\n\nFF OUTPUT - DROPOUT:", feed_forward_output)
         enc_output = self.add_norm2(addnorm_output, feed_forward_output)
-        print("\n\nENC OUTPUT:", enc_output)
+        print("\n\n ENC OUTPUT:", enc_output)  # (None, 64, 2048)
         return enc_output
 
 
@@ -153,11 +149,10 @@ class Decoder(Layer):
         self.supports_masking = True
 
     def call(self, inputs, encoder_outputs, training, mask=None):
-        print("\n\nDEC INPUT:", inputs)
         inputs = self.pos_encoding(inputs)
-        print("\n\nPOS ENCODING:", inputs)
+        print("\n\nINPUTS DEC:", inputs)  # (None, 24, 2048)
         causal_mask = self.get_causal_attention_mask(inputs)
-        print("\n\nCAUSAL MASK:", causal_mask)
+        print("\n\nCAUSAL MASK:", causal_mask)  # (None, 24, 24)
         if mask is not None:
             padding_mask = tf.cast(mask[:, :, tf.newaxis], dtype=tf.int32)
             combined_mask = tf.cast(mask[:, tf.newaxis, :], dtype=tf.int32)
@@ -165,36 +160,32 @@ class Decoder(Layer):
         else:
             combined_mask = None
             padding_mask = None
-
+        print("\n\nPADDING MASK:", padding_mask)  # (None, 24, 24)
+        print("\n\nCOMBINED MASK:", combined_mask)  # (None, 24, 24)
         multihead_output_1 = self.multihead_attention_1(
             query=inputs, value=inputs, key=inputs, attention_mask=combined_mask
         )
-        print("\n\nMHA OUT1:", multihead_output_1)
+        print("\n\n MHA1:", multihead_output_1)  # (None, 24, 2048)
         multihead_output_1 = self.dropout_1(multihead_output_1, training=training)
-        print("\n\nMHA OUT1 - DROPOUT:", multihead_output_1)
         addnorm_output_1 = self.add_norm1(inputs, multihead_output_1)
-        print("\n\nADD NORM OUT1:", addnorm_output_1)
+        print("\n\n ADD NORM 1:", multihead_output_1)  # (None, 24, 2048)
         multihead_output_2 = self.multihead_attention_2(
             query=addnorm_output_1,
             value=encoder_outputs,
             key=encoder_outputs,
             attention_mask=padding_mask,
         )
-        print("\n\nMHA OUT2:", multihead_output_2)
+        print("\n\n MHA2:", multihead_output_1)  # (None, 24, 2048)
         multihead_output_2 = self.dropout_2(multihead_output_2, training=training)
-        print("\n\nMHA OUT2 - DROPOUT:", multihead_output_2)
         addnorm_output_2 = self.add_norm2(addnorm_output_1, multihead_output_2)
-        print("\n\nADD NORM OUT2:", addnorm_output_2)
-
+        print("\n\n ADD NORM 2:", multihead_output_1)  # (None, 24, 2048)
         ff_output = self.feed_forward(addnorm_output_2)
-        print("\n\nFF:", ff_output)
+        print("\n\n FF:", ff_output)  # (None, 24, 2048)
         ff_output = self.dropout_3(ff_output, training=training)
-        print("\n\nFF - DROPOUT:", ff_output)
-
         addnorm_output_3 = self.add_norm3(addnorm_output_2, ff_output)
-        print("\n\nADD NORM OUT3:", addnorm_output_3)
+        print("\n\n ADD NORM 3:", multihead_output_1)  # (None, 24, 2048)
         dec_output = self.dense(addnorm_output_3)
-        print("\n\nDEC OUTPUT AFTER DENSE:", dec_output)
+        print("\n\n DEC_OUTPUT:", dec_output)  # (None, 24, 20000)
         return dec_output
 
     def get_causal_attention_mask(self, inputs):
@@ -232,9 +223,6 @@ class ImageCaptioningModel(keras.Model):
         self.value_dim = value_dim
         self.seq_length = seq_length
         self.vocab_size = vocab_size
-        self.loss_tracker = keras.metrics.Mean(name="loss")
-        self.acc_tracker = keras.metrics.Mean(name="accuracy")
-        self.num_captions_per_image = 5
         self.encoder = Encoder(
             embed_dim,
             ff_dim,
@@ -246,13 +234,17 @@ class ImageCaptioningModel(keras.Model):
             embed_dim, ff_dim, num_heads, vocab_size, key_dim, value_dim, seq_length
         )
 
+        self.loss_tracker = keras.metrics.Mean(name="loss")
+        self.acc_tracker = keras.metrics.Mean(name="accuracy")
+        self.num_captions_per_image = 5
+
     def call(self, inputs):
         enc_input = self.cnn_model(inputs[0])
-        print("\nENC_INPUT", enc_input)
+        print('\n\nENC_INPUT', enc_input)
         enc_output = self.encoder(enc_input, False)
-        print("\nENC_OUTPUT", enc_output)
+        print('\n\nENC_INPUT', enc_input)
         dec_output = self.decoder(inputs[2], enc_output, training=inputs[1], mask=None)
-        print("\nDEC_OUTPPUT", dec_output)
+        print('\n\nENC_INPUT', enc_input)
         return dec_output
 
     def calculate_loss(self, y_true, y_pred, mask):
@@ -368,6 +360,4 @@ class ImageCaptioningModel(keras.Model):
 
     @property
     def metrics(self):
-        # we need to list our metrics here so the `reset_states()` can be
-        # called automatically.
         return [self.loss_tracker, self.acc_tracker]

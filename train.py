@@ -121,6 +121,8 @@ test_dataset = make_dataset(
     tokenizer=tokenizer,
 )
 
+print("TRAIN DATA", train_dataset)
+
 # get model
 model = ImageCaptioningModel(
     cnn_model=CNN_MODEL,
@@ -162,9 +164,9 @@ history = model.fit(
 )
 
 # compute definitive metrics on train/valid/test set
-train_metrics = model.evaluate(train_dataset, batch_size=BATCH_SIZE)
-valid_metrics = model.evaluate(valid_dataset, batch_size=BATCH_SIZE)
-test_metrics = model.evaluate(test_dataset, batch_size=BATCH_SIZE)
+# train_metrics = model.evaluate(train_dataset, batch_size=BATCH_SIZE)
+# valid_metrics = model.evaluate(valid_dataset, batch_size=BATCH_SIZE)
+# test_metrics = model.evaluate(test_dataset, batch_size=BATCH_SIZE)
 
 # create new directory for saving model
 NEW_DIR = SAVE_DIR + DATE_NOW
@@ -178,20 +180,20 @@ json.dump(history_dict, open(SAVE_DIR + "{}/history.json".format(DATE_NOW), "w")
 model.save_weights(SAVE_DIR + "{}/model_weights_coco.h5".format(DATE_NOW))
 
 # print metric results
-metrics_results = {
-    "TRAIN_SET": "Train Loss = %.4f - Train Accuracy = %.4f"
-    % (train_metrics[0], train_metrics[1]),
-    "VALID_SET": "Valid Loss = %.4f - Valid Accuracy = %.4f"
-    % (valid_metrics[0], valid_metrics[1]),
-    "TEST_SET": "Test Loss = %.4f - Test Accuracy = %.4f"
-    % (test_metrics[0], test_metrics[1]),
-}
-print(metrics_results)
+# metrics_results = {
+#     "TRAIN_SET": "Train Loss = %.4f - Train Accuracy = %.4f"
+#     % (train_metrics[0], train_metrics[1]),
+#     "VALID_SET": "Valid Loss = %.4f - Valid Accuracy = %.4f"
+#     % (valid_metrics[0], valid_metrics[1]),
+#     "TEST_SET": "Test Loss = %.4f - Test Accuracy = %.4f"
+#     % (test_metrics[0], test_metrics[1]),
+# }
+# print(metrics_results)
 
 # save metric results
-json.dump(
-    metrics_results, open(SAVE_DIR + "{}/metrics_results.json".format(DATE_NOW), "w")
-)
+# json.dump(
+#     metrics_results, open(SAVE_DIR + "{}/metrics_results.json".format(DATE_NOW), "w")
+# )
 
 # save config model train
 json.dump(config_train, open(SAVE_DIR + "{}/config_train.json".format(DATE_NOW), "w"))

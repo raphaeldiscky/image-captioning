@@ -56,8 +56,10 @@ def read_image(data_aug):
         img = tf.io.read_file(img_path)
         img = tf.image.decode_jpeg(img, channels=3)
         img = tf.image.resize(img, IMAGE_SIZE)
+
         if data_aug:
             img = augment(img)
+
         img = tf.image.convert_image_dtype(img, tf.float32)
         return img
 
@@ -86,14 +88,18 @@ transform = tf.keras.Sequential(
 
 def make_dataset(images, captions, data_aug, tokenizer):
     read_image_output = read_image(data_aug)
+    print('\n\nREAD IMAGE OUT, ', read_image_output)
     images_dataset = tf.data.Dataset.from_tensor_slices(images)
+    print('\n\nFROM TENSOR, ', images_dataset)
     images_dataset = images_dataset.map(read_image_output, num_parallel_calls=AUTOTUNE)
-    # add token <start> and <end> to list of captions
+    print('\n\nMAPPED, ', images_dataset)
     data_cap_with_token = add_token(captions)
     caption_dataset = tf.data.Dataset.from_tensor_slices(data_cap_with_token).map(
         tokenizer, num_parallel_calls=AUTOTUNE
     )
+    print('\n\nFINAL CAPTIONS DATASET, ',  caption_dataset)
     dataset = tf.data.Dataset.zip((images_dataset, caption_dataset))
+    print('\n\nZIPPED, ', dataset)
     dataset = dataset.batch(BATCH_SIZE).shuffle(SHUFFLE_DIM).prefetch(AUTOTUNE)
     return dataset
 

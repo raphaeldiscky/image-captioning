@@ -1,0 +1,1 @@
+["Bleu_1: 0.658", "Bleu_2: 0.489", "Bleu_3: 0.344", "Bleu_4: 0.239", "METEOR: 0.234", "ROUGE_L: 0.498", "CIDEr: 0.902", {"EPOCH": 13, "CNN_MODEL": "resnet", "NUM_HEADS": 6, "EMBED_DIM": 1024}]

@@ -1,5 +1,5 @@
 # change this date to the date you want to inference and plot
-DATE_TO_INFERENCE = "11_17_2022_09_47_23"
+DATE_TO_INFERENCE = "11_25_2022_23_01_13"
 
 # choose to validate on "test" or "val" dataset
 DATASET_TO_INFERENCE = "test"

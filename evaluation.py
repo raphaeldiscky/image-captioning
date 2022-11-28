@@ -1,5 +1,4 @@
-from pycocotools.coco import COCO
-from pycocoevalcap.eval import COCOEvalCap
+
 from settings_evaluation import (
     INFERENCE_TEST_RESULT_PATH,
     VAL_RAW_PATH,
@@ -11,6 +10,9 @@ import shutil
 
 
 print("\n\nEVALUATE: {}\n\n".format(DATE_TO_EVALUATE))
+
+from pycocotools.coco import COCO
+from pycocoevalcap.eval import COCOEvalCap
 
 results = []
 

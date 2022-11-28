@@ -37,5 +37,8 @@ vectorized_words = vectorize_layer(word_tensors)
 positional_embedding = PositionalEmbedding(
     output_sequence_length, vocab_size, output_sequence_length
 )
+
+print('\n\nVECTORIZED WORDS', vectorized_words)
+
 attnisallyouneed_output = positional_embedding(vectorized_words)
 print("\n\nOutput from my_embedded_layer: ", attnisallyouneed_output)
