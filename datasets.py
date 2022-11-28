@@ -88,18 +88,18 @@ transform = tf.keras.Sequential(
 
 def make_dataset(images, captions, data_aug, tokenizer):
     read_image_output = read_image(data_aug)
-    print('\n\nREAD IMAGE OUT, ', read_image_output)
+    # print('\n\nREAD IMAGE OUT, ', read_image_output)
     images_dataset = tf.data.Dataset.from_tensor_slices(images)
-    print('\n\nFROM TENSOR, ', images_dataset)
+    # print('\n\nFROM TENSOR, ', images_dataset)
     images_dataset = images_dataset.map(read_image_output, num_parallel_calls=AUTOTUNE)
-    print('\n\nMAPPED, ', images_dataset)
+    # print('\n\nMAPPED, ', images_dataset)
     data_cap_with_token = add_token(captions)
     caption_dataset = tf.data.Dataset.from_tensor_slices(data_cap_with_token).map(
         tokenizer, num_parallel_calls=AUTOTUNE
     )
-    print('\n\nFINAL CAPTIONS DATASET, ',  caption_dataset)
+    # print('\n\nFINAL CAPTIONS DATASET, ',  caption_dataset)
     dataset = tf.data.Dataset.zip((images_dataset, caption_dataset))
-    print('\n\nZIPPED, ', dataset)
+    # print('\n\nZIPPED, ', dataset)
     dataset = dataset.batch(BATCH_SIZE).shuffle(SHUFFLE_DIM).prefetch(AUTOTUNE)
     return dataset
 

@@ -80,24 +80,24 @@ class Encoder(Layer):
         self.add_norm2 = AddNormalization()
 
     def call(self, inputs, training):
-        print("\n\n INPUTS ENC:", inputs)  # (None, 64, 1280)
+        # print("\n\n INPUTS ENC:", inputs)  # (None, 64, 1280)
         inputs = self.dense(inputs)
-        print("\n\n DENSE:", inputs)  # (None, 64, 2048)
+        # print("\n\n DENSE:", inputs)  # (None, 64, 2048)
         multihead_attention_output = self.multihead_attention(
             query=inputs, value=inputs, key=inputs
         )
-        print("\n\n MHA:", multihead_attention_output)  # (None, 64, 2048)
+        # print("\n\n MHA:", multihead_attention_output)  # (None, 64, 2048)
         multihead_attention_output = self.dropout_1(
             multihead_attention_output, training
         )
-        print("\n\n DROP:", multihead_attention_output)
+        # print("\n\n DROP:", multihead_attention_output)
         addnorm_output = self.add_norm1(inputs, multihead_attention_output)
-        print("\n\n NORM:", addnorm_output)  # (None, 64, 2048)
+        # print("\n\n NORM:", addnorm_output)  # (None, 64, 2048)
         feed_forward_output = self.feed_forward(addnorm_output)
-        print("\n\n FF:", feed_forward_output)  # (None, 64, 2048)
+        # print("\n\n FF:", feed_forward_output)  # (None, 64, 2048)
         feed_forward_output = self.dropout_2(feed_forward_output, training)
         enc_output = self.add_norm2(addnorm_output, feed_forward_output)
-        print("\n\n ENC OUTPUT:", enc_output)  # (None, 64, 2048)
+        # print("\n\n ENC OUTPUT:", enc_output)  # (None, 64, 2048)
         return enc_output
 
 
@@ -150,9 +150,9 @@ class Decoder(Layer):
 
     def call(self, inputs, encoder_outputs, training, mask=None):
         inputs = self.pos_encoding(inputs)
-        print("\n\nINPUTS DEC:", inputs)  # (None, 24, 2048)
+        # print("\n\nINPUTS DEC:", inputs)  # (None, 24, 2048)
         causal_mask = self.get_causal_attention_mask(inputs)
-        print("\n\nCAUSAL MASK:", causal_mask)  # (None, 24, 24)
+        # print("\n\nCAUSAL MASK:", causal_mask)  # (None, 24, 24)
         if mask is not None:
             padding_mask = tf.cast(mask[:, :, tf.newaxis], dtype=tf.int32)
             combined_mask = tf.cast(mask[:, tf.newaxis, :], dtype=tf.int32)
@@ -160,32 +160,32 @@ class Decoder(Layer):
         else:
             combined_mask = None
             padding_mask = None
-        print("\n\nPADDING MASK:", padding_mask)  # (None, 24, 24)
-        print("\n\nCOMBINED MASK:", combined_mask)  # (None, 24, 24)
+        # print("\n\nPADDING MASK:", padding_mask)  # (None, 24, 24)
+        # print("\n\nCOMBINED MASK:", combined_mask)  # (None, 24, 24)
         multihead_output_1 = self.multihead_attention_1(
             query=inputs, value=inputs, key=inputs, attention_mask=combined_mask
         )
-        print("\n\n MHA1:", multihead_output_1)  # (None, 24, 2048)
+        # print("\n\n MHA1:", multihead_output_1)  # (None, 24, 2048)
         multihead_output_1 = self.dropout_1(multihead_output_1, training=training)
         addnorm_output_1 = self.add_norm1(inputs, multihead_output_1)
-        print("\n\n ADD NORM 1:", multihead_output_1)  # (None, 24, 2048)
+        # print("\n\n ADD NORM 1:", multihead_output_1)  # (None, 24, 2048)
         multihead_output_2 = self.multihead_attention_2(
             query=addnorm_output_1,
             value=encoder_outputs,
             key=encoder_outputs,
             attention_mask=padding_mask,
         )
-        print("\n\n MHA2:", multihead_output_1)  # (None, 24, 2048)
+        # print("\n\n MHA2:", multihead_output_1)  # (None, 24, 2048)
         multihead_output_2 = self.dropout_2(multihead_output_2, training=training)
         addnorm_output_2 = self.add_norm2(addnorm_output_1, multihead_output_2)
-        print("\n\n ADD NORM 2:", multihead_output_1)  # (None, 24, 2048)
+        # print("\n\n ADD NORM 2:", multihead_output_1)  # (None, 24, 2048)
         ff_output = self.feed_forward(addnorm_output_2)
-        print("\n\n FF:", ff_output)  # (None, 24, 2048)
+        # print("\n\n FF:", ff_output)  # (None, 24, 2048)
         ff_output = self.dropout_3(ff_output, training=training)
         addnorm_output_3 = self.add_norm3(addnorm_output_2, ff_output)
-        print("\n\n ADD NORM 3:", multihead_output_1)  # (None, 24, 2048)
+        # print("\n\n ADD NORM 3:", multihead_output_1)  # (None, 24, 2048)
         dec_output = self.dense(addnorm_output_3)
-        print("\n\n DEC_OUTPUT:", dec_output)  # (None, 24, 20000)
+        # print("\n\n DEC_OUTPUT:", dec_output)  # (None, 24, 20000)
         return dec_output
 
     def get_causal_attention_mask(self, inputs):
@@ -240,11 +240,11 @@ class ImageCaptioningModel(keras.Model):
 
     def call(self, inputs):
         enc_input = self.cnn_model(inputs[0])
-        print('\n\nENC_INPUT', enc_input)
+        # print('\n\nENC_INPUT', enc_input) # (None, 64, 2048)
         enc_output = self.encoder(enc_input, False)
-        print('\n\nENC_INPUT', enc_input)
+        # print('\n\nENC_INPUT', enc_input) # (None, 64, 2048)
         dec_output = self.decoder(inputs[2], enc_output, training=inputs[1], mask=None)
-        print('\n\nENC_INPUT', enc_input)
+        # print('\n\nENC_INPUT', enc_input) # (None, 64, 2048)
         return dec_output
 
     def calculate_loss(self, y_true, y_pred, mask):

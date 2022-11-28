@@ -33,16 +33,16 @@ class PositionalEmbedding(Layer):
         return P
 
     def call(self, inputs):
-        print("\n\nPOS EMBEDDING INPUTS", inputs)
+        # print("\n\nPOS EMBEDDING INPUTS", inputs)
         position_indices = tf.range(
             tf.shape(inputs)[-1]
         )  # get [0, 1, 2, 3, ... seq len]
-        print("\n\nPOSITION_INDICES", position_indices)
+        # print("\n\nPOSITION_INDICES", position_indices)
         embedded_words = self.word_embedding_layer(inputs)
-        print("\n\nEMBEDDED WORDS,", embedded_words)
+        # print("\n\nEMBEDDED WORDS,", embedded_words)
         embedded_positions = self.position_embedding_layer(position_indices)
-        print("\n\nEMBEDDED POSITIONS,", embedded_words)
-        print(
-            "\n\nOUTPUT POSITIONAL ENCODING LAYER", embedded_words + embedded_positions
-        )
+        # print("\n\nEMBEDDED POSITIONS,", embedded_words)
+        # print(
+        #     "\n\nOUTPUT POSITIONAL ENCODING LAYER", embedded_words + embedded_positions
+        # )
         return embedded_words + embedded_positions
