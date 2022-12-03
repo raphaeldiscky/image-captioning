@@ -5,7 +5,6 @@ from settings_train import (
     IMAGE_SIZE,
     NUM_TRAIN_IMG,
     NUM_VALID_IMG,
-    SHUFFLE_DIM,
 )
 
 AUTOTUNE = tf.data.AUTOTUNE
@@ -56,11 +55,9 @@ def read_image(data_aug):
         img = tf.io.read_file(img_path)
         img = tf.image.decode_jpeg(img, channels=3)
         img = tf.image.resize(img, IMAGE_SIZE)
-
+        img = tf.image.convert_image_dtype(img, tf.float32)
         if data_aug:
             img = augment(img)
-
-        img = tf.image.convert_image_dtype(img, tf.float32)
         return img
 
     def augment(img):
@@ -100,7 +97,7 @@ def make_dataset(images, captions, data_aug, tokenizer):
     # print('\n\nFINAL CAPTIONS DATASET, ',  caption_dataset)
     dataset = tf.data.Dataset.zip((images_dataset, caption_dataset))
     # print('\n\nZIPPED, ', dataset)
-    dataset = dataset.batch(BATCH_SIZE).shuffle(SHUFFLE_DIM).prefetch(AUTOTUNE)
+    dataset = dataset.batch(BATCH_SIZE).prefetch(AUTOTUNE)
     return dataset
 
 

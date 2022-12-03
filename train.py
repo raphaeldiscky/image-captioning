@@ -195,8 +195,8 @@ model.save_weights(SAVE_DIR + "{}/model_weights_coco.h5".format(DATE_NOW))
 #     metrics_results, open(SAVE_DIR + "{}/metrics_results.json".format(DATE_NOW), "w")
 # )
 
-# save config model train
+# save model train configuration
 json.dump(config_train, open(SAVE_DIR + "{}/config_train.json".format(DATE_NOW), "w"))
 
-# save tokenizer model
+# save tokenizer
 save_tokenizer(tokenizer, NEW_DIR)

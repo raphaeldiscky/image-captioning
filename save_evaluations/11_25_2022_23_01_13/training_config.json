@@ -1,18 +1,21 @@
 {
-    "CNN_MODEL": "efficientnet",
+    "CNN_MODEL": "resnet",
+    "EARLY_STOPPING": false,
     "IMAGE_SIZE": [
         256,
         256
     ],
     "MAX_VOCAB_SIZE": 20000,
     "SEQ_LENGTH": 25,
-    "EMBED_DIM": 512,
-    "NUM_HEADS": 8,
+    "EMBED_DIM": 2048,
+    "NUM_HEADS": 6,
     "FF_DIM": 2048,
     "SHUFFLE_DIM": 512,
     "BATCH_SIZE": 64,
-    "EPOCHS": 20,
+    "EPOCHS": 13,
     "VOCAB_SIZE": 20000,
+    "KEY_DIM": 64,
+    "VALUE_DIM": 64,
     "NUM_TRAIN_IMG": 113287,
     "NUM_VALID_IMG": 5000,
     "NUM_TEST_IMG": 5000

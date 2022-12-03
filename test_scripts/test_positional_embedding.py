@@ -13,9 +13,12 @@ from positional_embedding import PositionalEmbedding
 # input: text_vectorization
 # output: sum of both word embedding and the position embedding (attention_is_all_you_need)
 
-output_sequence_length = 6
-vocab_size = 10
-sentences = ["<start> saya adalah robot <end>", "<start> kamu juga robot <end>"]
+output_sequence_length = 25
+vocab_size = 20000
+sentences = [
+    "<start> Sebuah restoran memiliki meja dan kursi kayu modern. <end>",
+    "<start> Sebuah meja restoran panjang dengan kursi bulat rotan. <end>",
+]
 
 # TEXT VECTORIZATION LAYER
 sentence_data = Dataset.from_tensor_slices(sentences)
@@ -38,7 +41,7 @@ positional_embedding = PositionalEmbedding(
     output_sequence_length, vocab_size, output_sequence_length
 )
 
-print('\n\nVECTORIZED WORDS', vectorized_words)
+print("\n\nVECTORIZED WORDS", vectorized_words)
 
 attnisallyouneed_output = positional_embedding(vectorized_words)
 print("\n\nOutput from my_embedded_layer: ", attnisallyouneed_output)

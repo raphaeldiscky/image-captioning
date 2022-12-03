@@ -9,9 +9,13 @@ from datasets import custom_standardization
 
 
 # input: list of sentences
-output_sequence_length = 6
-vocab_size = 20
-sentences = ["<start> saya adalah robot. <end>", "<start> kamu juga robot. <end>"]
+output_sequence_length = 25
+vocab_size = 20000
+sentences = [
+    "<start> Sebuah restoran memiliki meja dan kursi kayu modern. <end>",
+    "<start> Sebuah meja restoran panjang dengan kursi bulat rotan. <end>",
+    "<start> Foto hitam dan putih seorang pria yang memakai jas dan dasi. <end>",
+]
 
 # TEXT VECTORIZATION LAYER
 sentence_data = Dataset.from_tensor_slices(sentences)
@@ -31,6 +35,7 @@ word_tensors = convert_to_tensor(sentences, dtype=tf.string)
 # use the word tensors to get vectorized phrases
 vectorized_words = vectorize_layer(word_tensors)
 
+print("\n\nWord tensor: ", word_tensors)
 print("\n\nVocabulary: ", vectorize_layer.get_vocabulary())
 print("\n\nVectorized words: ", vectorized_words)
 

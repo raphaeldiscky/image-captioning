@@ -1,5 +1,5 @@
 import tensorflow as tf
-from settings_train import EMBED_DIM, IMAGE_SIZE, SEQ_LENGTH
+from settings_train import IMAGE_SIZE
 from tensorflow.keras.layers import (
     Layer,
     Reshape,
@@ -24,6 +24,7 @@ def get_cnn_model(selected_cnn_model):
         base_model_out = base_model.output
         base_model_out = Reshape((-1, 1280))(base_model_out)
         cnn_model = keras.models.Model(base_model.input, base_model_out)
+
     elif selected_cnn_model == "resnet":
         base_model = resnet.ResNet101(
             include_top=False, weights="imagenet", input_shape=(*IMAGE_SIZE, 3)

@@ -55,6 +55,8 @@ def generate_caption(image_path, model, tokenizer, SEQ_LENGTH):
     # pass the image to the CNN model
     img = model.cnn_model(img)
 
+    print("\n\nCNN MODEL", img)
+
     # pass the image features to the encoder
     encoded_img = model.encoder(img, training=False)
 

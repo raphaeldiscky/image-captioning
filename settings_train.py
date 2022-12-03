@@ -18,8 +18,6 @@ EMBED_DIM = 2048
 NUM_HEADS = 6
 # per-layer units in the feed-forward network
 FF_DIM = 2048
-# shuffle dataset dim on tf.data.Dataset
-SHUFFLE_DIM = 512
 # batch size
 BATCH_SIZE = 64
 # numbers of training epochs
